@@ -4,6 +4,8 @@
 
 Anno 117 Pipe Hub is a community project and is not an official Ubisoft product. It reads the local Windows named pipe `\\.\pipe\anno117` and distributes decoded Anno 117 statistics to any number of programs through a local WebSocket server. No MQTT broker is required.
 
+Experimental project: Anno 117 Pipe Hub is still evolving. Features and behavior may change. Feedback and bug reports are welcome.
+
 ### Why
 
 Anno 117 exposes statistics through a local named pipe. The Hub makes the decoded data available as WebSocket messages, so multiple tools can use the same live feed at once. With LAN mode enabled, clients on other computers in the selected private network can connect to that feed too.
@@ -70,6 +72,7 @@ AI assistance: AI tools were used in support of development for code, tests, and
 
 ```powershell
 go test ./...
+node --check src/AnnoPipeHub/wwwroot/app.js
 ```
 
 ---
@@ -77,6 +80,8 @@ go test ./...
 ## Deutsch
 
 Anno 117 Pipe Hub ist ein Community-Projekt und kein offizielles Ubisoft-Produkt. Es liest die lokale Windows-Named-Pipe `\\.\pipe\anno117` und verteilt die dekodierten Anno-117-Statistikdaten über einen lokalen WebSocket-Server an beliebig viele Programme. Es wird kein MQTT-Broker benötigt.
+
+Experimentelles Projekt: Anno 117 Pipe Hub wird weiterentwickelt. Funktionen und Verhalten können sich ändern. Feedback und Fehlermeldungen sind willkommen.
 
 ### Warum
 
@@ -144,5 +149,5 @@ KI-Unterstützung: Bei der Entwicklung wurden KI-Tools unterstützend für Code,
 
 ```powershell
 go test ./...
-node --check src\AnnoPipeHub\wwwroot\app.js
+node --check src/AnnoPipeHub/wwwroot/app.js
 ```
