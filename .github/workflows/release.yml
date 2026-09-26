@@ -80,9 +80,28 @@ jobs:
       - name: Install ClamAV
         run: sudo apt-get update && sudo apt-get install --yes clamav clamav-freshclam
 
+      - name: Stop automatic Freshclam service
+        run: |
+          sudo systemctl stop clamav-freshclam.service 2>/dev/null || true
+          sudo service clamav-freshclam stop 2>/dev/null || true
+          freshclam_running=1
+          for attempt in $(seq 1 30); do
+            if ! pgrep -x freshclam >/dev/null; then
+              freshclam_running=0
+              break
+            fi
+            sleep 1
+          done
+          if [ "$freshclam_running" -ne 0 ]; then
+            echo 'Freshclam is still running after the service stop.' >&2
+            pgrep -a -x freshclam >&2 || true
+            exit 1
+          fi
+
       - name: Update ClamAV signatures
         run: |
-          sudo freshclam --stdout --verbose
+          freshclam_log="$RUNNER_TEMP/freshclam.log"
+          sudo freshclam --stdout --verbose --log="$freshclam_log"
           signature_count=$(find /var/lib/clamav -maxdepth 1 -type f \( -name '*.cvd' -o -name '*.cld' \) | wc -l)
           if [ "$signature_count" -eq 0 ]; then
             echo 'No ClamAV signature databases found after update.' >&2
