@@ -1,0 +1,12 @@
+<!doctype html>
+<html lang="de"><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>Anno 117 Pipe Hub Testclient</title>
+<style>body{font:15px system-ui;max-width:900px;margin:2rem auto;padding:0 1rem;background:#f4f2ea;color:#18211f}input,button{padding:.6rem;margin:.2rem}#state{font-weight:700}pre{white-space:pre-wrap;background:#fff;padding:1rem;border:1px solid #ccc;max-height:65vh;overflow:auto}</style>
+<h1>Anno 117 Pipe Hub Browser-Testclient</h1>
+<p>Verbindet sich ausschließlich mit dem lokalen Daten-WebSocket. Keine Named Pipe, keine Bibliotheken.</p>
+<label>Adresse <input id="url" size="42" value="ws://127.0.0.1:8766/ws"></label><br><label>LAN-Token (optional) <input id="token" size="42" type="password"></label><br><button id="connect">Verbinden</button> <button id="clear">Ausgabe leeren</button><p>Status: <span id="state">getrennt</span></p><pre id="output"></pre>
+<script>
+const $=id=>document.getElementById(id), out=$('output');
+function print(value){out.textContent += JSON.stringify(value,null,2)+'\n\n';out.scrollTop=out.scrollHeight;}
+$('connect').onclick=()=>{const ws=new WebSocket($('url').value);$('state').textContent='verbinde...';ws.onopen=()=>{ $('state').textContent='verbunden'; if($('token').value) ws.send(JSON.stringify({type:'auth',token:$('token').value})); };ws.onmessage=e=>{try{const m=JSON.parse(e.data);$('state').textContent=`verbunden · ${m.type||'unbekannt'}`;print(m);}catch{$('state').textContent='ungültige JSON-Nachricht';}};ws.onerror=()=>$('state').textContent='Fehler';ws.onclose=()=>$('state').textContent='getrennt';};
+$('clear').onclick=()=>out.textContent='';
+</script>

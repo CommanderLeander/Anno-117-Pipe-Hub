@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <EnableDefaultContentItems>false</EnableDefaultContentItems>
+    <InvariantGlobalization>true</InvariantGlobalization>
+    <AssemblyName>Anno117PipeHub</AssemblyName>
+    <RootNamespace>AnnoPipeHub</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="wwwroot\**\*" LogicalName="AnnoPipeHub.WebContent.%(RecursiveDir)%(Filename)%(Extension)" />
+  </ItemGroup>
+</Project>

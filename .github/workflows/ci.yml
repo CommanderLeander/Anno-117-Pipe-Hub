@@ -1,0 +1,30 @@
+name: Windows build and tests
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-test:
+    runs-on: windows-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Build application
+        run: dotnet build src/AnnoPipeHub/AnnoPipeHub.csproj --configuration Release --nologo
+
+      - name: Run tests
+        run: dotnet run --project tests/AnnoPipeHub.Tests/AnnoPipeHub.Tests.csproj --configuration Release
+
+      - name: Check dashboard JavaScript
+        shell: pwsh
+        run: node --check src/AnnoPipeHub/wwwroot/app.js

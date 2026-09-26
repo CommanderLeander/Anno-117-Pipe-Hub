@@ -1,0 +1,40 @@
+# .NET build output
+**/bin/
+**/obj/
+
+# Local SDK, NuGet, and temporary tooling state
+.local/
+.nuget/
+[Tt]emp/
+[Tt]mp/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Runtime configuration and secrets
+/config/hub-settings.json
+/config/hub-token.bin
+config/*.json
+config/*.bin
+**/config/*.json
+**/config/*.bin
+!config/hub-settings.example.json
+*.log
+*.log.*
+
+# Published/generated binaries
+publish/
+*.exe
+*.dll
+*.pdb
+
+# IDE/editor files
+.vs/
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+
+# OS files
+.DS_Store
+Thumbs.db

@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="de" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title data-i18n="pageTitle">Anno 117 Pipe Hub</title>
+  <link rel="stylesheet" href="/app.css">
+</head>
+<body>
+  <main class="shell">
+    <header><div><p class="eyebrow" data-i18n="eyebrowPipeRelay"></p><h1>Anno 117 Pipe Hub</h1></div><div class="header-tools"><div class="language-switch" role="group" data-i18n-aria-label="languageSelection"><button id="languageDe" type="button" data-language="de">DE</button><span aria-hidden="true">|</span><button id="languageEn" type="button" data-language="en">EN</button></div><button id="themeToggle" class="icon-button" type="button" data-i18n-title="toggleTheme" data-i18n-aria-label="toggleTheme">◐</button></div></header>
+    <section class="status-grid" data-i18n-aria-label="statusSection">
+      <article><span data-i18n="pipeLabel"></span><strong id="pipeStatus">...</strong></article>
+      <button id="clientsCard" class="status-card" type="button" aria-expanded="false" aria-controls="clientsPanel" data-i18n-aria-label="showClients"><span data-i18n="clientsLabel"></span><strong id="clients">0</strong></button>
+      <article><span data-i18n="lastMessageLabel"></span><strong id="lastMessage">...</strong></article>
+      <article><span data-i18n="protocolLabel"></span><strong id="protocol">...</strong></article>
+    </section>
+    <section id="clientsPanel" class="clients-panel" hidden><div class="clients-panel-head"><strong data-i18n="connectedClientsHeading"></strong><div class="clients-panel-actions"><button id="clientsRefresh" type="button" class="subtle-button" data-i18n="refresh"></button><button id="clientsClose" type="button" class="subtle-button" data-i18n="close"></button></div></div><div id="clientsList" class="clients-list"><p class="empty" data-i18n="noClients"></p></div></section>
+    <section class="notice"><span class="dot"></span><p id="error">...</p></section>
+    <section class="settings-panel">
+      <div class="section-heading"><div><p class="eyebrow" data-i18n="eyebrowDataListener"></p><h2 data-i18n="connectionsHeading"></h2></div><span id="listenerState">...</span></div>
+      <form id="settingsForm">
+        <label><span data-i18n="webSocketPort"></span><input id="port" type="number" min="1024" max="65535" value="8766" required data-i18n-aria-label="webSocketPort"></label>
+        <label class="toggle"><input id="lanEnabled" type="checkbox"><span data-i18n="lanAvailable"></span></label>
+        <label id="interfaceRow" hidden><span data-i18n="privateIpv4"></span><select id="lanAddress" data-i18n-aria-label="privateIpv4"></select></label>
+        <button type="submit" data-i18n="applyRestart"></button>
+      </form>
+      <div class="addresses"><strong data-i18n="reachableAddresses"></strong><code id="localAddress">ws://127.0.0.1:8766/ws</code><code id="lanAddressText" hidden></code></div>
+      <div id="tokenBox" class="token-box" hidden><strong data-i18n="lanToken"></strong><div><code id="token"></code><button id="toggleToken" type="button" data-i18n="showToken" data-i18n-aria-label="showToken"></button><button id="copyToken" type="button" data-i18n="copy"></button><button id="regenerateToken" type="button" data-i18n="regenerate"></button></div><p data-i18n="tokenRestartHint"></p><p data-i18n="authHint"></p></div>
+      <p id="networkWarning" class="warning" hidden><strong data-i18n="securityWarning"></strong> <span data-i18n="lanWarning"></span></p>
+      <p id="settingsError" class="form-error" role="alert"></p>
+    </section>
+    <section class="data-section"><button id="productionToggle" class="section-heading collapse-toggle" type="button" aria-expanded="true" aria-controls="productionPanel" data-i18n-aria-label="collapseProduction"><div><p class="eyebrow" data-i18n="eyebrowLiveSnapshots"></p><h2 data-i18n="productionData"></h2></div><div class="collapse-status"><span id="updated">...</span><svg id="productionIcon" class="collapse-chevron" viewBox="0 0 20 20" aria-hidden="true"><path d="m4 7 6 6 6-6" /></svg></div></button><div id="productionPanel"><div id="snapshots" class="snapshots"><p class="empty">...</p></div></div></section>
+    <section class="debug-section"><button id="debugToggle" class="section-heading collapse-toggle" type="button" aria-expanded="false" aria-controls="debugPanel" data-i18n-aria-label="expandDebug"><div><p class="eyebrow" data-i18n="eyebrowDebug"></p><h2 data-i18n="debugConsole"></h2></div><div class="collapse-status"><span id="debugCount">0</span><svg id="debugIcon" class="collapse-chevron" viewBox="0 0 20 20" aria-hidden="true"><path d="m4 7 6 6 6-6" /></svg></div></button><div id="debugPanel" hidden><p class="debug-note" data-i18n="debugBounded"></p><div class="debug-controls"><button id="fileLogToggle" type="button" class="subtle-button" aria-pressed="false"></button><button id="clearDebugLog" type="button" class="subtle-button" data-i18n="clearLog" data-i18n-aria-label="clearLog"></button><span id="fileLogPath"></span><span id="fileLogError" role="alert"></span><span id="clearLogNote" class="debug-clear-note" role="status"></span></div><div id="debugEntries" class="debug-entries"><p class="empty" data-i18n="debugEmpty"></p></div></div></section>
+  </main>
+  <script src="/app.js"></script>
+</body>
+</html>
