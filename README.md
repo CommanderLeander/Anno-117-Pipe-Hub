@@ -64,6 +64,8 @@ The protocol reference under `references\ubisoft-anno117-pipe` is documentation 
 
 Project-owned code is released under the [MIT License](LICENSE). The bundled pipe reference is separate third-party material and remains under its original license; see [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md). Contributions should follow [CONTRIBUTING.md](CONTRIBUTING.md). Security reports should follow [SECURITY.md](SECURITY.md).
 
+AI assistance: AI tools were used in support of development for code, tests, and documentation. The maintainer reviews the adopted changes and is responsible for the final state and ongoing maintenance.
+
 ### Tests
 
 ```powershell
@@ -135,6 +137,8 @@ Die Protokollreferenz liegt unter `references\ubisoft-anno117-pipe`. Die kopiert
 ### Lizenz und Projektregeln
 
 Projekt-eigener Code steht unter der [MIT-Lizenz](LICENSE). Die enthaltene Pipe-Referenz ist getrenntes Drittanbietermaterial und bleibt unter ihrer ursprünglichen Lizenz; siehe [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md). Beiträge sollten [CONTRIBUTING.md](CONTRIBUTING.md) folgen. Sicherheitsmeldungen gehören nach [SECURITY.md](SECURITY.md).
+
+KI-Unterstützung: Bei der Entwicklung wurden KI-Tools unterstützend für Code, Tests und Dokumentation eingesetzt. Der Maintainer prüft die übernommenen Änderungen und verantwortet den finalen Stand sowie die weitere Wartung.
 
 ### Tests
 
