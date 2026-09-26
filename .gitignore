@@ -16,7 +16,6 @@
 # Published/generated binaries
 publish/
 *.exe
-*.dll
 
 # IDE/editor files
 .vscode/*

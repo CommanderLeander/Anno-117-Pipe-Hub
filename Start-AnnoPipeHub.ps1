@@ -14,7 +14,7 @@ try {
     $env:TMP = $tempDirectory
     if ($UsePublished) {
         if (-not (Test-Path $published -PathType Leaf)) {
-            throw "Die verÃ¶ffentlichte EXE wurde nicht gefunden: $published"
+                throw "Die Veroeffentlichung-EXE wurde nicht gefunden: $published"
         }
         $process = Start-Process -FilePath $published -WorkingDirectory $root -PassThru
     } else {
@@ -40,7 +40,7 @@ try {
         if ($process.HasExited) {
             throw "Der Hub-Prozess wurde vor dem Start des Dashboards beendet (Exitcode $($process.ExitCode))."
         }
-        throw "Das Dashboard antwortet nach 30 Sekunden nicht unter $dashboard. Der Hub-Prozess lÃ¤uft mÃ¶glicherweise noch (PID $($process.Id))."
+            throw "Das Dashboard antwortet nach 30 Sekunden nicht unter $dashboard. Der Hub-Prozess laeuft moeglicherweise noch (PID $($process.Id))."
     }
     Start-Process $dashboard
     Write-Host "Anno 117 Pipe Hub gestartet (PID $($process.Id)). Dashboard: http://127.0.0.1:8765/"

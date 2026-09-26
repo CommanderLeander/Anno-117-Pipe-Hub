@@ -7,12 +7,12 @@ Anno 117 Pipe Hub is a community project and is not an official Ubisoft product.
 ### Requirements
 
 - Windows x64
-- Go 1.22 or newer for development runs
+- Go 1.26 or newer for development runs (CI tests Go 1.26.x and 1.27.x)
 - Anno 117 started with the `/pipe` launch argument. The tool does not start Anno automatically.
 
 ### Run a release
 
-Download the finished `Anno117PipeHub.exe` from the [GitHub Releases](https://github.com/CommanderLeander/Anno-117-Pipe-Hub/releases) page. The release EXE is a statically linked Go binary; using it requires neither Go nor PowerShell.
+Download the finished ZIP release package from the [GitHub Releases](https://github.com/CommanderLeander/Anno-117-Pipe-Hub/releases) page. It contains the standalone Go executable `Anno117PipeHub.exe`, which requires neither Go nor PowerShell, plus `LICENSE` and `THIRD_PARTY_NOTICES.md` in the ZIP root. Distribute the complete ZIP contents together.
 
 Start `Anno117PipeHub.exe` whenever convenient; the Hub can start before Anno 117 and waits for the pipe. When you start Anno 117, it must use the `/pipe` launch argument. The Hub does not open the browser automatically. While it is running, open the dashboard manually at `http://127.0.0.1:8765/`. Keep the Hub open while using the dashboard or WebSocket.
 
@@ -22,7 +22,7 @@ If Anno is not running yet, the Hub stays open and retries the pipe connection w
 
 ### Run from source
 
-This workflow is intended for development and for running the Hub from the source tree. It requires Go 1.22 or newer. Run the start script in PowerShell from the project directory:
+This workflow is intended for development and for running the Hub from the source tree. It requires Go 1.26 or newer. Run the start script in PowerShell from the project directory:
 
 ```powershell
 .\Start-AnnoPipeHub.ps1
@@ -46,7 +46,7 @@ Raw data in hexadecimal is not written to files by default. Explicit raw logging
 .\Publish-Windows.ps1
 ```
 
-The output is placed in `publish\win-x64`. The script creates a statically linked single-binary Windows x64 application. The resulting output consists of `Anno117PipeHub.exe`; the dashboard is embedded in the application.
+The output is placed in `publish\win-x64`, and the release archive is `publish\Anno117PipeHub-windows-x64.zip`. The ZIP contains the standalone Go single-file Windows x64 application `Anno117PipeHub.exe`, plus `LICENSE` and `THIRD_PARTY_NOTICES.md` in its root. No Go installation is required to run the EXE; distribute the ZIP contents together.
 
 ### Message format
 
@@ -75,12 +75,12 @@ Anno 117 Pipe Hub ist ein Community-Projekt und kein offizielles Ubisoft-Produkt
 ### Voraussetzungen
 
 - Windows x64
-- Für den Entwicklungsstart: Go 1.22 oder neuer
+- Für den Entwicklungsstart: Go 1.26 oder neuer (CI testet Go 1.26.x und 1.27.x)
 - Anno 117 muss mit dem Startargument `/pipe` gestartet werden. Das Tool startet Anno nicht automatisch.
 
 ### Release herunterladen und starten
 
-Lade die fertige `Anno117PipeHub.exe` von der Seite [GitHub Releases](https://github.com/CommanderLeander/Anno-117-Pipe-Hub/releases) herunter. Die Release-EXE ist eine statisch gelinkte Go-Binärdatei; zum Verwenden werden weder Go noch PowerShell benötigt.
+Lade das fertige ZIP-Release-Paket von der Seite [GitHub Releases](https://github.com/CommanderLeander/Anno-117-Pipe-Hub/releases) herunter. Es enthält die eigenständige Go-Einzeldatei `Anno117PipeHub.exe`, für deren Ausführung weder Go noch PowerShell benötigt werden, sowie `LICENSE` und `THIRD_PARTY_NOTICES.md` im ZIP-Hauptverzeichnis. Der vollständige ZIP-Inhalt muss zusammen verteilt werden.
 
 Starte `Anno117PipeHub.exe`, wann es passt; der Hub kann vor Anno 117 gestartet werden und wartet auf die Pipe. Wenn du Anno 117 startest, muss es das Startargument `/pipe` verwenden. Der Hub öffnet den Browser derzeit nicht automatisch. Öffne während des Betriebs das Dashboard manuell unter `http://127.0.0.1:8765/`. Der Hub muss während der Nutzung des Dashboards oder WebSockets geöffnet bleiben.
 
@@ -90,7 +90,7 @@ Wenn Anno noch nicht läuft, bleibt der Hub geöffnet und versucht die Pipe mit 
 
 ### Aus dem Quellcode starten
 
-Dieser Weg ist für die Entwicklung und den Start des Hubs aus dem Quellcode gedacht. Dafür wird Go 1.22 oder neuer benötigt. Führe das Startskript in PowerShell aus dem Projektordner aus:
+Dieser Weg ist für die Entwicklung und den Start des Hubs aus dem Quellcode gedacht. Dafür wird Go 1.26 oder neuer benötigt. Führe das Startskript in PowerShell aus dem Projektordner aus:
 
 ```powershell
 .\Start-AnnoPipeHub.ps1
@@ -114,7 +114,7 @@ Rohdaten als Hex werden standardmäßig nicht in die Datei geschrieben. Für aus
 .\Publish-Windows.ps1
 ```
 
-Die Ausgabe liegt unter `publish\win-x64`. Das Skript erstellt eine statisch gelinkte Einzel-Binärdatei für Windows x64. Die resultierende Ausgabe besteht damit aus `Anno117PipeHub.exe`; das Dashboard ist in der Anwendung enthalten.
+Die Ausgabe liegt unter `publish\win-x64`; das Release-ZIP liegt unter `publish\Anno117PipeHub-windows-x64.zip`. Das ZIP enthält die eigenständige Go-Einzeldatei `Anno117PipeHub.exe` sowie `LICENSE` und `THIRD_PARTY_NOTICES.md` im Hauptverzeichnis. Zur Ausführung der EXE ist keine Go-Installation erforderlich; der vollständige ZIP-Inhalt muss zusammen verteilt werden.
 
 ### Nachrichtenformat
 

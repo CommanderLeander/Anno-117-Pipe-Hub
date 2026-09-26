@@ -1,6 +1,6 @@
 module github.com/CommanderLeander/Anno-117-Pipe-Hub
 
-go 1.22
+go 1.26
 
 require (
 	github.com/Microsoft/go-winio v0.6.2
