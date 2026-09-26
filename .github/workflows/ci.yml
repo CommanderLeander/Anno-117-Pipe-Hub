@@ -32,3 +32,7 @@ jobs:
       - name: Check dashboard JavaScript
         shell: pwsh
         run: node --check src/AnnoPipeHub/wwwroot/app.js
+
+      - name: Test dashboard translations
+        shell: pwsh
+        run: node tests/debug-translations.test.js

@@ -1,19 +1,12 @@
-# Go build output
-**/bin/
-**/obj/
-
 # Local tooling and temporary state
 .local/
 [Tt]emp/
 [Tt]mp/
 *.user
-*.suo
-*.userosscache
+**/bin/
+**/obj/
 
 # Runtime configuration and secrets
-/config/hub-settings.json
-config/*.json
-config/*.bin
 **/config/*.json
 **/config/*.bin
 !config/hub-settings.example.json
@@ -24,10 +17,8 @@ config/*.bin
 publish/
 *.exe
 *.dll
-*.pdb
 
 # IDE/editor files
-.vs/
 .vscode/*
 !.vscode/settings.json
 !.vscode/extensions.json
