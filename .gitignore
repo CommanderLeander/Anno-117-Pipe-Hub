@@ -17,6 +17,9 @@
 publish/
 *.exe
 
+# Local test files
+tests/
+
 # IDE/editor files
 .vscode/*
 !.vscode/settings.json
