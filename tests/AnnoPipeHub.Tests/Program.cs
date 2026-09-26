@@ -2,6 +2,7 @@ using System.Buffers.Binary;
 using System.ComponentModel;
 using System.Net.WebSockets;
 using System.Text;
+using Microsoft.AspNetCore.Http;
 using AnnoPipeHub;
 
 var tests = new (string Name, Action Test)[]
@@ -20,8 +21,11 @@ var tests = new (string Name, Action Test)[]
     ("Strukturierter Pipe-Fehlerlog", TestStructuredPipeErrorLog),
     ("Datei-Log-Pfad", TestFileLogPath),
     ("Datei-Log Opt-in", TestFileLogOptIn),
+    ("Datei-Log Fehler und Reaktivierung", TestFileLogRecovery),
     ("Debug-Log leeren ohne Datei-Log", TestClearDebugLog),
-    ("Multi-Client-Fanout-ohne-Blockierung", TestFanout)
+    ("Multi-Client-Fanout-ohne-Blockierung", TestFanout),
+    ("Origin-Schutz", TestOriginPolicy),
+    ("Sprachneutrale Statuswerte", TestStatusValues)
 };
 foreach (var (name, test) in tests)
 {
@@ -90,6 +94,8 @@ static void TestListenerRules()
 {
     Assert(NetworkSettings.IsValidPort(8766) && !NetworkSettings.IsValidPort(80) && !NetworkSettings.IsValidPort(70000), "Portregeln fehlerhaft.");
     Assert(NetworkSettings.IsPrivate(System.Net.IPAddress.Parse("192.168.1.25")), "Private IPv4 nicht erkannt.");
+    Assert(NetworkSettings.IsPrivate(System.Net.IPAddress.Parse("10.0.0.5")) && NetworkSettings.IsPrivate(System.Net.IPAddress.Parse("172.16.0.5")), "RFC1918-Adresse nicht erkannt.");
+    Assert(!NetworkSettings.IsPrivate(System.Net.IPAddress.Parse("127.0.0.1")) && !NetworkSettings.IsPrivate(System.Net.IPAddress.Parse("127.0.0.2")), "Loopback-Adresse fälschlich als LAN-Adresse akzeptiert.");
     Assert(!NetworkSettings.IsPrivate(System.Net.IPAddress.Parse("8.8.8.8")), "Öffentliche IPv4 fälschlich akzeptiert.");
 }
 
@@ -105,11 +111,20 @@ static void TestDebugLog()
 {
     var hub = new HubState();
     for (var index = 0; index < 205; index++) hub.AddDebug("message", $"Eintrag {index}");
-    var message = PipeDecoder.DecodeFrame(Payload(PipeMessageType.AreaProductionStatistics, b => { b.AddRange([1, 2, 3]); WriteInt32(b, 9); WriteString(b, "Area"); WriteInt64(b, 1); WriteInt32(b, 0); }).ToArray());
+    var message = PipeDecoder.DecodeFrame(Payload(PipeMessageType.AreaProductionStatistics, b =>
+    {
+        b.AddRange([1, 2, 3]); WriteInt32(b, 1234); WriteString(b, "Area"); WriteInt64(b, 1); WriteInt32(b, 1);
+        WriteInt32(b, 42); foreach (var value in new[] { 10f, 2f, 8f, 12f, 1f }) WriteSingle(b, value);
+        WriteInt32(b, 3); WriteInt32(b, 4); WriteSingle(b, 100.5f); WriteInt32(b, 90); WriteSingle(b, 5.5f); WriteSingle(b, 4.5f);
+        WriteInt32(b, 1); WriteInt32(b, 500); WriteInt32(b, 12); WriteInt32(b, 1); WriteInt32(b, 600); WriteInt32(b, 3);
+    }).ToArray());
     hub.Accept(message, 1, [3]);
     Assert(hub.DebugLog.Count == 200, "Debug-Log ist nicht auf 200 Einträge begrenzt.");
     Assert(hub.DebugLog[0].Message == "Eintrag 6", "Älteste Debug-Einträge wurden nicht verworfen.");
     Assert(hub.DebugLog[^1].MessageType == "AreaProductionStatistics" && hub.DebugLog[^1].Details is not null, "Dekodierte Debug-Details fehlen.");
+    var details = System.Text.Json.JsonSerializer.Serialize(hub.DebugLog[^1].Details);
+    Assert(details.Contains("\"productGuid\":42", StringComparison.Ordinal) && details.Contains("\"productGeneration\":10", StringComparison.Ordinal) && details.Contains("\"productConsumption\":2", StringComparison.Ordinal) && details.Contains("\"productDelta\":8", StringComparison.Ordinal), "Produktwerte fehlen in den Debugdetails.");
+    Assert(details.Contains("workforceGuidToAmount", StringComparison.Ordinal) && details.Contains("\"500\":12", StringComparison.Ordinal) && details.Contains("buildingGuidToAmount", StringComparison.Ordinal) && details.Contains("\"600\":3", StringComparison.Ordinal), "GUID-Mengen fehlen in den Debugdetails.");
 }
 
 static void TestPipeConnectionErrors()
@@ -165,6 +180,45 @@ static void TestFileLogOptIn()
     Assert(content.Contains("message.after", StringComparison.Ordinal) && !content.Contains("message.before", StringComparison.Ordinal), $"Beim Einschalten wurden alte RAM-Einträge nachträglich gespeichert: {content}");
     service.StopAsync(CancellationToken.None).GetAwaiter().GetResult();
     Directory.Delete(root, true);
+}
+
+static void TestFileLogRecovery()
+{
+    var root = Path.Combine(Environment.CurrentDirectory, ".local", "file-log-retry-test");
+    if (Directory.Exists(root)) Directory.Delete(root, true);
+    Directory.CreateDirectory(Path.GetDirectoryName(root)!);
+    File.WriteAllText(root, "blocker");
+    var hub = new HubState();
+    var service = new FileLogService(hub, root);
+    service.StartAsync(CancellationToken.None).GetAwaiter().GetResult();
+    var failed = service.EnableAsync().GetAwaiter().GetResult();
+    Assert(!failed.Available && failed.Error == "filelog.unavailable", "Schreibfehler wird nicht sichtbar gemeldet.");
+    File.Delete(root);
+    Directory.CreateDirectory(root);
+    var recovered = service.EnableAsync().GetAwaiter().GetResult();
+    Assert(recovered.Enabled && recovered.Available, "Datei-Log lässt sich nach Schreibfehler nicht reaktivieren.");
+    service.DisableLoggingAsync().GetAwaiter().GetResult();
+    service.StopAsync(CancellationToken.None).GetAwaiter().GetResult();
+    Directory.Delete(root, true);
+}
+
+static void TestOriginPolicy()
+{
+    var allowedHost = new DefaultHttpContext(); allowedHost.Request.Host = new HostString("127.0.0.1", 8765);
+    var forbiddenHost = new DefaultHttpContext(); forbiddenHost.Request.Host = new HostString("127.0.0.1", 8766);
+    Assert(RequestSecurity.IsAllowedDashboardGet(allowedHost.Request), "Legitimer Dashboard-Host wurde abgelehnt.");
+    Assert(!RequestSecurity.IsAllowedDashboardGet(forbiddenHost.Request), "Fremder Host wurde für Dashboard-GET akzeptiert.");
+    Assert(RequestSecurity.IsAllowedOrigin(null), "Native Client ohne Origin wurde abgelehnt.");
+    Assert(RequestSecurity.IsAllowedOrigin(RequestSecurity.DashboardOrigin), "Dashboard-Origin wurde abgelehnt.");
+    Assert(!RequestSecurity.IsAllowedOrigin("https://evil.example"), "Fremde Browser-Origin wurde akzeptiert.");
+    Assert(!RequestSecurity.IsAllowedOrigin("http://127.0.0.1:8766"), "WebSocket-Origin des Datenports wurde unerwartet akzeptiert.");
+}
+
+static void TestStatusValues()
+{
+    var status = new HubState().Status;
+    Assert(status.HubStatus == "Ready", "hubStatus ist nicht sprachneutral.");
+    Assert(Enum.GetValues<PipeConnectionState>().ToHashSet().SetEquals([PipeConnectionState.Waiting, PipeConnectionState.Connected, PipeConnectionState.Disconnected, PipeConnectionState.Timeout, PipeConnectionState.NotFound, PipeConnectionState.Busy]), "Nicht alle Pipe-Statuswerte sind modelliert.");
 }
 
 static void TestClearDebugLog()

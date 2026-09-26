@@ -100,7 +100,7 @@ Clients should tolerate unknown fields and event types. The complete machine-rea
 
 ### `hub.status`
 
-This status snapshot is sent on connection and whenever the Hub status changes. It is not a game event. `pipeStatus` is one of `Waiting`, `Connected`, or `Disconnected`; `protocolVersion`, `lastMessageAtUtc`, and `error` may be `null`. Do not make mod logic depend on the language of `hubStatus`.
+This status snapshot is sent on connection and whenever the Hub status changes. It is not a game event. `hubStatus` is the stable machine value `Ready`; dashboard translations are presentation-only. `pipeStatus` is one of `Waiting`, `Connected`, `Disconnected`, `Timeout`, `NotFound`, or `Busy`; `protocolVersion`, `lastMessageAtUtc`, and `error` may be `null`.
 
 ### `state.snapshot`
 
@@ -280,7 +280,7 @@ Wird beim Verbindungsaufbau und bei Statusänderungen gesendet:
   "receivedAtUtc": "2026-09-25T19:30:00.0000000+00:00",
   "hub": {
     "status": {
-      "hubStatus": "Bereit",
+      "hubStatus": "Ready",
       "pipeStatus": "Connected",
       "connectedClients": 1,
       "lastMessageAtUtc": "2026-09-25T19:29:59.0000000+00:00",
@@ -299,7 +299,7 @@ Wird beim Verbindungsaufbau und bei Statusänderungen gesendet:
 }
 ```
 
-`hub.status` ist ein Status-Snapshot, kein Spielereignis. Die im Hub implementierten Werte für `pipeStatus` sind `Waiting`, `Connected` und `Disconnected`. `protocolVersion` kann `null` sein, bevor die Pipe-Version bekannt ist. `lastMessageAtUtc` und `error` können `null` sein. Die Property `hubStatus` stammt direkt aus dem Hub und ist derzeit eine interne Statusbeschreibung; Mod-Logik sollte sich nicht auf eine bestimmte Sprache dieses Textes verlassen.
+`hub.status` ist ein Status-Snapshot, kein Spielereignis. `hubStatus` ist der stabile Maschinenwert `Ready`; Übersetzungen gehören nur in die Anzeige. Die im Hub implementierten Werte für `pipeStatus` sind `Waiting`, `Connected`, `Disconnected`, `Timeout`, `NotFound` und `Busy`. `protocolVersion` kann `null` sein, bevor die Pipe-Version bekannt ist. `lastMessageAtUtc` und `error` können `null` sein.
 
 ### `state.snapshot`
 

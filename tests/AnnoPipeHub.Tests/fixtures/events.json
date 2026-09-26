@@ -1,5 +1,5 @@
 [
- {"schemaVersion":1,"type":"hub.status","receivedAtUtc":"2026-09-25T12:00:00Z","hub":{"status":{"hubStatus":"Bereit","pipeStatus":"Connected","connectedClients":1,"lastMessageAtUtc":null,"protocolVersion":2,"error":null},"listener":{"lanEnabled":false,"bindAddress":"127.0.0.1","port":8766,"state":"Listening","connectedClients":1,"error":null}}},
+ {"schemaVersion":1,"type":"hub.status","receivedAtUtc":"2026-09-25T12:00:00Z","hub":{"status":{"hubStatus":"Ready","pipeStatus":"Connected","connectedClients":1,"lastMessageAtUtc":null,"protocolVersion":2,"error":null},"listener":{"lanEnabled":false,"bindAddress":"127.0.0.1","port":8766,"state":"Listening","connectedClients":1,"error":null}}},
  {"schemaVersion":1,"type":"state.snapshot","receivedAtUtc":"2026-09-25T12:00:00Z","snapshots":[]},
  {"schemaVersion":1,"type":"session.start","receivedAtUtc":"2026-09-25T12:00:00Z","session":{"sessionName":"Testsession"}},
  {"schemaVersion":1,"type":"session.end","receivedAtUtc":"2026-09-25T13:00:00Z"},

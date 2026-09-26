@@ -31,21 +31,37 @@ app.MapGet("/", () => Results.Content(ReadDashboardFile("index.html"), "text/htm
 app.MapGet("/app.css", () => Results.Content(ReadDashboardFile("app.css"), "text/css; charset=utf-8"));
 app.MapGet("/app.js", () => Results.Content(ReadDashboardFile("app.js"), "text/javascript; charset=utf-8"));
 
-app.MapGet("/api/status", (HubState hub) => Results.Json(new { schemaVersion = 1, type = "hub.status", receivedAtUtc = DateTimeOffset.UtcNow, hub = hub.Status, listener = hub.Listener, clients = hub.Clients, fileLog = hub.FileLog }));
-app.MapGet("/api/debug", (HubState hub) => Results.Json(new { entries = hub.DebugLog }));
-app.MapPost("/api/debug/clear", (HubState hub) => { hub.ClearDebugLog(); return Results.Ok(new { ok = true }); });
-app.MapPost("/api/file-log", async (FileLogRequest request, FileLogService fileLog) =>
+app.MapGet("/api/status", (HttpRequest request, HubState hub) => !RequestSecurity.IsAllowedDashboardGet(request)
+    ? Results.StatusCode(StatusCodes.Status403Forbidden)
+    : Results.Json(new { schemaVersion = 1, type = "hub.status", receivedAtUtc = DateTimeOffset.UtcNow, hub = hub.Status, listener = hub.Listener, clients = hub.Clients, fileLog = hub.FileLog }));
+app.MapGet("/api/debug", (HttpRequest request, HubState hub) => !RequestSecurity.IsAllowedDashboardGet(request)
+    ? Results.StatusCode(StatusCodes.Status403Forbidden)
+    : Results.Json(new { entries = hub.DebugLog }));
+app.MapPost("/api/debug/clear", (HttpRequest request, HubState hub) =>
 {
+    if (!RequestSecurity.IsAllowedDashboardPost(request)) return Results.StatusCode(StatusCodes.Status403Forbidden);
+    hub.ClearDebugLog(); return Results.Ok(new { ok = true });
+});
+app.MapPost("/api/file-log", async (HttpRequest httpRequest, FileLogRequest request, FileLogService fileLog) =>
+{
+    if (!RequestSecurity.IsAllowedDashboardPost(httpRequest)) return Results.StatusCode(StatusCodes.Status403Forbidden);
     var status = request.Enabled ? await fileLog.EnableAsync() : await fileLog.DisableLoggingAsync();
     return Results.Json(new { ok = status.Available || !request.Enabled, fileLog = status });
 });
-app.MapGet("/api/settings", (DataListenerService listener) => Results.Json(new { settings = listener.Settings, token = listener.Settings.LanEnabled ? listener.Token : null, interfaces = listener.Interfaces }));
-app.MapPost("/api/settings", async (ListenerSettings settings, DataListenerService listener) =>
+app.MapGet("/api/settings", (HttpRequest request, DataListenerService listener) => !RequestSecurity.IsAllowedDashboardGet(request)
+    ? Results.StatusCode(StatusCodes.Status403Forbidden)
+    : Results.Json(new { settings = listener.Settings, token = listener.Settings.LanEnabled ? listener.Token : null, interfaces = listener.Interfaces }));
+app.MapPost("/api/settings", async (HttpRequest request, ListenerSettings settings, DataListenerService listener) =>
 {
+    if (!RequestSecurity.IsAllowedDashboardPost(request)) return Results.StatusCode(StatusCodes.Status403Forbidden);
     var result = await listener.ApplyAsync(settings);
     return result.Success ? Results.Ok(new { ok = true, listener = listener.Settings, token = listener.Settings.LanEnabled ? listener.Token : null }) : Results.BadRequest(new { ok = false, error = result.Error });
 });
-app.MapPost("/api/token/regenerate", (DataListenerService listener) => Results.Ok(new { token = listener.RegenerateToken() }));
+app.MapPost("/api/token/regenerate", (HttpRequest request, DataListenerService listener) =>
+{
+    if (!RequestSecurity.IsAllowedDashboardPost(request)) return Results.StatusCode(StatusCodes.Status403Forbidden);
+    return Results.Ok(new { token = listener.RegenerateToken() });
+});
 
 app.MapFallback(() => Results.Content(ReadDashboardFile("index.html"), "text/html; charset=utf-8"));
 await app.RunAsync();

@@ -35,7 +35,7 @@ public sealed class HubState
     private FileLogStatus _fileLogStatus = new(false, false, null, null);
     private string? _lastDebugSignature;
     private DateTimeOffset _lastDebugAtUtc;
-    private HubStatusSnapshot _status = new("Bereit", PipeConnectionState.Waiting, 0, null, null, null);
+    private HubStatusSnapshot _status = new("Ready", PipeConnectionState.Waiting, 0, null, null, null);
     private ListenerStatus _listener = ListenerStatus.Default;
 
     public HubStatusSnapshot Status { get { lock (_gate) return _status with { ConnectedClients = _clients.Count }; } }
@@ -101,7 +101,23 @@ public sealed class HubState
         {
             sessionId = statistics.SessionId, islandId = statistics.IslandId, areaIndex = statistics.AreaIndex,
             sessionGuid = statistics.SessionGuid, areaName = statistics.AreaName, rawTimestamp = statistics.RawTimestamp,
-            entries = statistics.Entries.Count
+            entries = statistics.Entries.Select(entry => new
+            {
+                productGuid = entry.ProductGuid,
+                productGeneration = entry.ProductGeneration,
+                productConsumption = entry.ProductConsumption,
+                productDelta = entry.ProductDelta,
+                perfectProductGeneration = entry.PerfectProductGeneration,
+                perfectProductConsumption = entry.PerfectProductConsumption,
+                amountOfBuildings = entry.AmountOfBuildings,
+                totalMaintenance = entry.TotalMaintenance,
+                totalIncome = entry.TotalIncome,
+                totalProfit = entry.TotalProfit,
+                summedProductivity = entry.SummedProductivity,
+                averageProductivity = entry.AverageProductivity,
+                workforceGuidToAmount = entry.WorkforceGuidToAmount,
+                buildingGuidToAmount = entry.BuildingGuidToAmount
+            }).ToArray()
         },
         _ => null
     };

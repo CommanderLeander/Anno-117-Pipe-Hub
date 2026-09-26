@@ -13,8 +13,7 @@ public sealed class DataListenerService(HubState hub, SettingsStore store, ILogg
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         _settings = store.Load();
-        _token = store.LoadToken() ?? SettingsStore.NewToken();
-        store.SaveToken(_token);
+        _token = SettingsStore.NewToken();
         store.Save(_settings);
         Console.WriteLine($"WebSocket: {(_settings.LanEnabled ? $"ws://{_settings.LanAddress}:{_settings.Port}/ws" : $"ws://127.0.0.1:{_settings.Port}/ws")}");
         Console.WriteLine($"LAN:       {(_settings.LanEnabled ? $"aktiv ({_settings.LanAddress})" : "deaktiviert")}");
@@ -64,7 +63,6 @@ public sealed class DataListenerService(HubState hub, SettingsStore store, ILogg
         lock (_gate)
         {
             _token = SettingsStore.NewToken();
-            store.SaveToken(_token);
             _restart.Cancel(); _restart.Dispose(); _restart = new CancellationTokenSource();
         }
         return _token;
@@ -81,6 +79,7 @@ public sealed class DataListenerService(HubState hub, SettingsStore store, ILogg
         app.Map("/ws", async context =>
         {
             if (!context.WebSockets.IsWebSocketRequest) { context.Response.StatusCode = 400; await context.Response.WriteAsync("WebSocket erforderlich."); return; }
+            if (!RequestSecurity.IsAllowedOrigin(context.Request.Headers.Origin.FirstOrDefault())) { context.Response.StatusCode = StatusCodes.Status403Forbidden; return; }
             using var socket = await context.WebSockets.AcceptWebSocketAsync();
             var endpoint = context.Connection.RemoteIpAddress is { } address
                 ? $"{address}:{context.Connection.RemotePort}"

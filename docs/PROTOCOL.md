@@ -18,7 +18,7 @@ Sent first after a successful connection and again whenever status changes.
 {"schemaVersion":1,"type":"hub.status","receivedAtUtc":"2026-09-25T12:00:00Z","hub":{"status":{"hubStatus":"Ready","pipeStatus":"Connected","connectedClients":1,"lastMessageAtUtc":"2026-09-25T11:59:58Z","protocolVersion":2,"error":null},"listener":{"lanEnabled":false,"bindAddress":"127.0.0.1","port":8766,"state":"Listening","connectedClients":1,"error":null}}}
 ```
 
-`pipeStatus` is `Waiting`, `Connected`, or `Disconnected`. `lastMessageAtUtc`, `protocolVersion`, and `error` may be `null`. The listener port is an integer from 1024 through 65535.
+`hubStatus` is the language-neutral machine value `Ready`; dashboard translations are presentation-only. `pipeStatus` is one of `Waiting`, `Connected`, `Disconnected`, `Timeout`, `NotFound`, or `Busy`; `lastMessageAtUtc`, `protocolVersion`, and `error` may be `null`. The listener port is an integer from 1024 through 65535.
 
 ## state.snapshot
 
@@ -82,10 +82,10 @@ Der JSON-Schema-Vertrag liegt unter `schema/anno117-event.schema.json`.
 Wird nach erfolgreicher Verbindung zuerst gesendet und bei Statusänderungen erneut.
 
 ```json
-{"schemaVersion":1,"type":"hub.status","receivedAtUtc":"2026-09-25T12:00:00Z","hub":{"status":{"hubStatus":"Bereit","pipeStatus":"Connected","connectedClients":1,"lastMessageAtUtc":"2026-09-25T11:59:58Z","protocolVersion":2,"error":null},"listener":{"lanEnabled":false,"bindAddress":"127.0.0.1","port":8766,"state":"Listening","connectedClients":1,"error":null}}}
+{"schemaVersion":1,"type":"hub.status","receivedAtUtc":"2026-09-25T12:00:00Z","hub":{"status":{"hubStatus":"Ready","pipeStatus":"Connected","connectedClients":1,"lastMessageAtUtc":"2026-09-25T11:59:58Z","protocolVersion":2,"error":null},"listener":{"lanEnabled":false,"bindAddress":"127.0.0.1","port":8766,"state":"Listening","connectedClients":1,"error":null}}}
 ```
 
-`pipeStatus` ist `Waiting`, `Connected` oder `Disconnected`. `lastMessageAtUtc`, `protocolVersion` und Fehler dürfen `null` sein. Listener-Port ist ein Integer von 1024 bis 65535.
+`hubStatus` ist der sprachneutrale Maschinenwert `Ready`; Übersetzungen gehören nur in die Dashboard-Anzeige. `pipeStatus` ist `Waiting`, `Connected`, `Disconnected`, `Timeout`, `NotFound` oder `Busy`. `lastMessageAtUtc`, `protocolVersion` und Fehler dürfen `null` sein. Listener-Port ist ein Integer von 1024 bis 65535.
 
 ## state.snapshot
 

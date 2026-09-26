@@ -11,7 +11,7 @@ public sealed class FileLogService : BackgroundService, IFileLogSink
     private readonly string _directory;
     private readonly Channel<DebugLogEntry> _queue = Channel.CreateBounded<DebugLogEntry>(new BoundedChannelOptions(QueueCapacity)
     {
-        FullMode = BoundedChannelFullMode.DropOldest,
+        FullMode = BoundedChannelFullMode.Wait,
         SingleReader = true,
         SingleWriter = false
     });
@@ -181,11 +181,14 @@ public sealed class FileLogService : BackgroundService, IFileLogSink
 
     private async Task DisableAsync(Exception exception)
     {
-        var error = new FileLogStatus(_enabled, false, _path, "filelog.unavailable");
+        _enabled = false;
+        if (_writer is not null) await _writer.DisposeAsync();
+        if (_stream is not null) await _stream.DisposeAsync();
+        _writer = null;
+        _stream = null;
+        var error = new FileLogStatus(false, false, _path, "filelog.unavailable");
         _hub.SetFileLogStatus(error);
         _hub.AddDebug("error", "filelog.unavailable", new { detail = exception.Message });
-        _queue.Writer.TryComplete();
-        await Task.CompletedTask;
     }
 
     private void CleanupOldFiles()

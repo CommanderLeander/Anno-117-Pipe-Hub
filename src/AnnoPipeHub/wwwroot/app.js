@@ -61,11 +61,11 @@ function setDebugOpen(value) { debugOpen = value; applyTranslations(); }
 function eventText(key, parameters = {}) { const template = eventTranslations[language][key] || key; return Object.entries(parameters || {}).reduce((value, [name, replacement]) => value.replaceAll(`{${name}}`, String(replacement)), template); }
 function eventCategory(key) { return categoryTranslations[language][key] || key.split('.')[0].toUpperCase(); }
 function eventParameters(entry) { return { ...(entry.parameters || {}), ...(entry.error?.parameters || {}) }; }
-function renderFileLog() { const button = $('fileLogToggle'); if (!button) return; button.textContent = text(fileLogStatus.enabled ? 'saveLogLocallyOn' : 'saveLogLocallyOff'); button.setAttribute('aria-pressed', String(fileLogStatus.enabled)); $('fileLogPath').textContent = fileLogStatus.path ? `${text('logPath')}: ${fileLogStatus.path}` : ''; $('fileLogError').textContent = fileLogStatus.enabled && !fileLogStatus.available ? text('fileLogError') : ''; $('clearLogNote').textContent = fileLogStatus.enabled ? text('logKeptInFile') : ''; }
+function renderFileLog() { const button = $('fileLogToggle'); if (!button) return; button.textContent = text(fileLogStatus.enabled ? 'saveLogLocallyOn' : 'saveLogLocallyOff'); button.setAttribute('aria-pressed', String(fileLogStatus.enabled)); $('fileLogPath').textContent = fileLogStatus.path ? `${text('logPath')}: ${fileLogStatus.path}` : ''; $('fileLogError').textContent = fileLogStatus.error ? eventText(fileLogStatus.error) : (!fileLogStatus.available ? text('fileLogError') : ''); $('clearLogNote').textContent = fileLogStatus.enabled ? text('logKeptInFile') : ''; }
 function renderToken() { $('token').textContent = tokenVisible ? settings.token || '' : '********'; const key = tokenVisible ? 'hideToken' : 'showToken'; $('toggleToken').textContent = text(key); $('toggleToken').setAttribute('aria-label', text(key)); }
 function toggleToken() { tokenVisible = !tokenVisible; renderToken(); }
 function regenerateToken() { if (!window.confirm(text('confirmRegenerate'))) return; fetch('/api/token/regenerate', { method: 'POST' }).then(response => response.json()).then(result => { settings.token = result.token; tokenVisible = false; renderToken(); }); }
-async function toggleFileLog() { const response = await fetch('/api/file-log', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ enabled: !fileLogStatus.enabled }) }); const result = await response.json(); if (result.fileLog) { fileLogStatus = result.fileLog; renderFileLog(); } }
+async function toggleFileLog() { const response = await fetch('/api/file-log', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ enabled: !fileLogStatus.enabled }) }); const result = await response.json(); if (result.fileLog) { fileLogStatus = result.fileLog; } if (result.ok === false && !result.fileLog) { fileLogStatus = { ...fileLogStatus, enabled: false, available: false, error: result.error || 'filelog.unavailable' }; } renderFileLog(); }
 async function clearDebugLog() { const response = await fetch('/api/debug/clear', { method: 'POST' }); if (response.ok) { debugEntries = []; renderDebug(); renderFileLog(); } }
 function refreshClients() { return fetch('/api/status', { cache: 'no-store' }).then(response => response.json()).then(updateStatus).catch(() => {}); }
 function setClientsOpen(value) { clientsOpen = value; applyTranslations(); if (value) refreshClients(); }
@@ -78,7 +78,7 @@ function updateStatus(message) {
   $('lastMessage').textContent = hub.lastMessageAtUtc ? new Date(hub.lastMessageAtUtc).toLocaleString(language === 'de' ? 'de-DE' : 'en-US') : text('noMessage');
   const fileLog = message.fileLog;
   if (fileLog) { fileLogStatus = fileLog; renderFileLog(); }
-  $('error').textContent = fileLog?.enabled && fileLog?.available === false ? text('fileLogError') : eventText(hub.error) || text('annoHint');
+  $('error').textContent = fileLog?.error ? eventText(fileLog.error) : fileLog?.available === false ? text('fileLogError') : eventText(hub.error) || text('annoHint');
   if (Array.isArray(message.clients)) { connectedClients = message.clients; renderClients(); }
   if (listener) { lastListener = listener; updateListenerState(listener); $('clients').textContent = listener.connectedClients ?? hub.connectedClients ?? 0; }
 }

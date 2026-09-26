@@ -14,4 +14,4 @@ This repository does not contain a private email address or promise a response t
 
 ## Handling secrets
 
-Never commit `config/hub-settings.json`, `config/hub-token.bin`, runtime logs, published binaries, or copied local credentials. The token is intended to be protected by Windows DPAPI for the current user, but `ws://` does not encrypt the token while it is sent over the network.
+Never commit `config/hub-settings.json`, `config/hub-token.bin`, runtime logs, published binaries, or copied local credentials. The current implementation keeps the LAN token only in process memory and generates a new one after restart. `ws://` does not encrypt the token while it is sent over the network.

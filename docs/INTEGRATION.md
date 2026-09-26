@@ -12,6 +12,8 @@ ws://127.0.0.1:8766/ws
 
 The administration dashboard remains local at `http://127.0.0.1:8765/`. The GUI can select the port and, optionally, a specific private IPv4 address. LAN clients might then use `ws://192.168.1.25:8766/ws`.
 
+The settings file is resolved from the process base directory: `Path.Combine(AppContext.BaseDirectory, "config", "hub-settings.json")`. For `dotnet run`, this is typically `src\AnnoPipeHub\bin\Debug\net8.0\config\hub-settings.json` (or the corresponding Release output). For the published single-file EXE, it is `publish\win-x64\config\hub-settings.json` beside the EXE. The repository example file is a template and is not read from the repository root.
+
 ## Connection
 
 1. Open a WebSocket.
@@ -21,6 +23,8 @@ The administration dashboard remains local at `http://127.0.0.1:8765/`. The GUI 
 5. New live events follow.
 
 LAN intentionally uses `ws://`: tokens and game data are not encrypted. The token is authentication, not encryption. Use trusted private networks only and do not configure router port forwarding. A local firewall rule may be required; the Hub does not change the Windows Firewall automatically.
+
+The WebSocket accepts the dashboard origin `http://127.0.0.1:8765` and native clients without an `Origin` header. Other browser origins are rejected. LAN authentication is still required for the dashboard origin. Dashboard POST requests for settings, token regeneration, debug-log clearing, and file logging use the same origin rule; no broad CORS policy is enabled.
 
 After an interruption, reconnect with bounded backoff. Each reconnect receives a current snapshot again. State is kept in memory only; restarting the Hub discards old session data.
 
@@ -58,6 +62,8 @@ ws://127.0.0.1:8766/ws
 
 Das Verwaltungs-Dashboard bleibt immer lokal unter `http://127.0.0.1:8765/`. In der GUI können Port und optional eine konkrete private IPv4-Adresse gewählt werden. LAN-Clients verwenden dann beispielsweise `ws://192.168.1.25:8766/ws`.
 
+Die Einstellungsdatei wird aus dem Prozess-Basisverzeichnis aufgelöst: `Path.Combine(AppContext.BaseDirectory, "config", "hub-settings.json")`. Bei `dotnet run` ist das typischerweise `src\AnnoPipeHub\bin\Debug\net8.0\config\hub-settings.json` (oder das entsprechende Release-Verzeichnis). Bei der veröffentlichten Single-File-EXE liegt sie neben der EXE unter `publish\win-x64\config\hub-settings.json`. Die Beispiel-Datei im Repository ist nur eine Vorlage und wird nicht aus dem Repository-Stamm gelesen.
+
 ## Verbindung
 
 1. WebSocket öffnen.
@@ -67,6 +73,8 @@ Das Verwaltungs-Dashboard bleibt immer lokal unter `http://127.0.0.1:8765/`. In 
 5. Neue Live-Ereignisse folgen danach.
 
 LAN nutzt absichtlich `ws://`: Token und Spieldaten sind nicht verschlüsselt. Das Token ist keine Verschlüsselung. Nur vertrauenswürdige private Netzwerke verwenden, keine Router-Portweiterleitung einrichten. Eine Firewall-Regel kann lokal erforderlich sein; der Hub ändert die Windows-Firewall nicht automatisch.
+
+Der WebSocket akzeptiert den Dashboard-Origin `http://127.0.0.1:8765` und native Clients ohne `Origin`-Header. Andere Browser-Origins werden abgelehnt. Die LAN-Authentifizierung bleibt auch für den Dashboard-Origin erforderlich. Dashboard-POSTs für Einstellungen, Token-Neugenerierung, Debug-Log-Leeren und Datei-Logging verwenden dieselbe Origin-Regel; es gibt kein breites CORS.
 
 Nach einer Unterbrechung kontrolliert neu verbinden. Jeder Reconnect erhält wieder einen aktuellen Snapshot. Der Zustand liegt nur im Arbeitsspeicher; ein Hub-Neustart verwirft alte Sitzungsdaten.
 
