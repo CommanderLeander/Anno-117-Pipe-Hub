@@ -25,7 +25,7 @@ Port `8766` is the default data-listener port and can be changed in the dashboar
 
 The Hub provides a read-only WebSocket endpoint. A normal HTTP request to `/ws` is not a data connection. Clients must not open `\\.\pipe\anno117` themselves.
 
-In LAN mode, receive messages directly after opening the WebSocket. The connection uses unencrypted `ws://`; use a trusted private network only.
+In LAN mode, receive messages directly after opening the WebSocket. The connection uses unencrypted `ws://`; use a trusted private network only. The Hub accepts connections without an `Origin` header and connections with the Origin `http://127.0.0.1:8765`. Native clients that do not send an `Origin` can therefore connect in LAN mode too. Browser clients from other origins may be rejected with HTTP 403, including a page opened locally via `file://`, which may send a different or `null` Origin. This Origin check is not application authentication.
 
 ## JSON contract
 
@@ -62,7 +62,7 @@ The data listener binds to loopback by default:
 ws://127.0.0.1:8766/ws
 ```
 
-No authentication is required. The Hub opens the game pipe only once; any number of local WebSocket clients can subscribe to the same stream.
+No authentication is required. The Hub is the only reader of the game pipe and reconnects after a disconnection; any number of local WebSocket clients can subscribe to the same stream.
 
 ### LAN mode
 
@@ -72,7 +72,7 @@ The dashboard can select a private IPv4 address and port, for example:
 ws://192.168.0.50:8767/ws
 ```
 
-LAN clients do not send an authentication message. Status and snapshot are sent immediately after the WebSocket connection is established.
+LAN clients do not send an authentication message. Status and snapshot are sent immediately after the WebSocket connection is established. The Hub accepts connections without an `Origin` header and connections with the Origin `http://127.0.0.1:8765`. Native clients that do not send an `Origin` can therefore connect in LAN mode too. Browser clients from other origins may be rejected with HTTP 403, including a page opened locally via `file://`, which may send a different or `null` Origin. This Origin check is not application authentication.
 
 LAN intentionally uses unencrypted `ws://`, not `wss://`. Use LAN only on a trusted private network. The Hub does not create Windows Firewall rules or router port forwarding.
 
@@ -121,7 +121,7 @@ The numeric GUIDs are JSON string keys and the values are integer amounts. Dupli
 
 ## Client examples and reconnect
 
-The JavaScript and client examples below connect only to the Hub, handle reconnects, and never open the game pipe. They validate `schemaVersion`, handle unknown events defensively, and use bounded reconnect backoff.
+The detailed browser JavaScript example follows in the German section below. The examples connect only to the Hub, handle reconnects, and never open the game pipe. They validate `schemaVersion`, handle unknown events defensively, and use bounded reconnect backoff.
 
 ## Troubleshooting
 
@@ -226,7 +226,7 @@ Standardmäßig bindet der Daten-Listener nur an Loopback:
 ws://127.0.0.1:8766/ws
 ```
 
-Es ist keine Authentifizierung erforderlich. Der Hub liest die Pipe weiterhin nur einmal; beliebig viele lokale WebSocket-Clients können denselben Datenstrom abonnieren.
+Es ist keine Authentifizierung erforderlich. Der Hub ist der einzige Leser der Spiel-Pipe und verbindet sich nach einer Trennung erneut; beliebig viele lokale WebSocket-Clients können denselben Datenstrom abonnieren.
 
 ### LAN-Modus
 
@@ -236,7 +236,7 @@ Im Dashboard kann eine konkrete private IPv4-Adresse und ein Port ausgewählt we
 ws://192.168.0.50:8767/ws
 ```
 
-LAN-Clients senden keine Authentifizierungsnachricht. Nach dem Verbinden werden Status und Snapshot direkt gesendet.
+LAN-Clients senden keine Authentifizierungsnachricht. Nach dem Verbinden werden Status und Snapshot direkt gesendet. Der Hub akzeptiert Verbindungen ohne `Origin`-Header sowie mit dem Origin `http://127.0.0.1:8765`. Native Clients ohne `Origin` können sich daher auch im LAN verbinden. Browser-Clients von anderen Origins können mit HTTP 403 abgewiesen werden. Das gilt auch für eine lokal über `file://` geöffnete Seite, die einen anderen oder `null`-Origin senden kann. Diese Origin-Prüfung ersetzt keine Anwendungsauthentifizierung.
 
 LAN verwendet absichtlich unverschlüsseltes `ws://`, nicht TLS-verschlüsseltes `wss://`. Verwende LAN nur in einem vertrauenswürdigen privaten Netzwerk. Der Hub richtet keine Windows-Firewall-Regel ein und konfiguriert keine Router-Portweiterleitung.
 
@@ -422,7 +422,7 @@ Das Schema legt für diese Zahlen keine Einheiten fest. Insbesondere darf ein Cl
 
 ## Browser-JavaScript mit Reconnect
 
-Dieses Beispiel öffnet ausschließlich den Hub-WebSocket. Es liest keine Named Pipe. Es akzeptiert nur bekannte Schema-Versionen, verarbeitet Nachrichten defensiv und verbindet mit begrenztem Backoff neu:
+Dieses Beispiel öffnet ausschließlich den Hub-WebSocket. Es liest keine Named Pipe. Es muss von einem erlaubten Origin ausgeführt werden, zum Beispiel `http://127.0.0.1:8765`; Browser-Seiten von anderen Origins können mit HTTP 403 abgewiesen werden. Es akzeptiert nur bekannte Schema-Versionen, verarbeitet Nachrichten defensiv und verbindet mit begrenztem Backoff neu:
 
 ```html
 <script>
