@@ -10,17 +10,29 @@ Anno 117 Pipe Hub is a community project and is not an official Ubisoft product.
 - .NET 8 SDK for development runs
 - Anno 117 started with the `/pipe` launch argument. The tool does not start Anno automatically.
 
-### Start
+### Run a release
 
-Run this in PowerShell from the project directory:
+Download the finished `Anno117PipeHub.exe` from the [GitHub Releases](https://github.com/CommanderLeander/Anno-117-Pipe-Hub/releases) page. The release EXE is self-contained; using it requires neither the .NET 8 SDK nor PowerShell.
+
+Start Anno 117 with the `/pipe` launch argument, then start `Anno117PipeHub.exe`. The Hub does not open the browser automatically. While it is running, open the dashboard manually at `http://127.0.0.1:8765/`. Keep the Hub open while using the dashboard or WebSocket.
+
+The data WebSocket defaults to `ws://127.0.0.1:8766/ws` and can be configured in the dashboard. By default it binds to loopback only. LAN mode binds exclusively to a selected private IPv4 address and requires a token. Port, LAN mode, and the selected address are stored in `config\hub-settings.json` relative to `AppContext.BaseDirectory`; the token exists only in process memory and is newly generated after every restart. The token is not written to files, logs, URLs, cookies, or browser storage. Regenerating it immediately invalidates the old token.
+
+If Anno is not running yet, the Hub stays open and retries the pipe connection with bounded backoff.
+
+### Run from source
+
+This workflow is intended for development and for running the Hub from the source tree. It requires the .NET 8 SDK. Run the start script in PowerShell from the project directory:
 
 ```powershell
 .\Start-AnnoPipeHub.ps1
 ```
 
-The dashboard is always available at `http://127.0.0.1:8765/`. The data WebSocket defaults to `ws://127.0.0.1:8766/ws` and can be configured in the dashboard. By default it binds to loopback only. LAN mode binds exclusively to a selected private IPv4 address and requires a token. Port, LAN mode, and the selected address are stored in `config\hub-settings.json`; the token is stored separately in `config\hub-token.bin`, encrypted with Windows DPAPI for the current Windows user. The token is not written to the JSON settings file, logs, URLs, cookies, or browser storage. Regenerating it immediately invalidates the old token.
+The start script starts the Hub and opens `http://127.0.0.1:8765/` in the browser. Keep the Hub open while using it. The script does not start Anno automatically.
 
-If Anno is not running yet, the Hub stays open and retries the pipe connection with bounded backoff.
+### Settings path
+
+The settings file is always resolved as `Path.Combine(AppContext.BaseDirectory, "config", "hub-settings.json")`. With `dotnet run`, `AppContext.BaseDirectory` is typically `src\AnnoPipeHub\bin\Debug\net8.0\` (or `Release\net8.0\`), so development settings belong in that output directory's `config\` subdirectory. For the published single-file EXE, the path is beside the EXE: `publish\win-x64\config\hub-settings.json`. The repository's `config\hub-settings.example.json` is only a template.
 
 ### Diagnostics and file logging
 
@@ -28,7 +40,7 @@ The local debug console shows received pipe events, decoded messages, connection
 
 Raw data in hexadecimal is not written to files by default. Explicit raw logging can be enabled by starting the process with `ANNO117PIPEHUB_RAW_LOG=1`. Disabling logging flushes and closes the file cleanly; existing log files are preserved. If the Hub cannot write beside the EXE, the dashboard shows a localized warning and does not silently use a fallback path. Tokens and credentials are never logged.
 
-### Release publish
+### Create a release from source
 
 ```powershell
 .\Publish-Windows.ps1
@@ -71,17 +83,29 @@ Anno 117 Pipe Hub ist ein Community-Projekt und kein offizielles Ubisoft-Produkt
 - Für den Entwicklungsstart: .NET 8 SDK
 - Anno 117 muss mit dem Startargument `/pipe` gestartet werden. Das Tool startet Anno nicht automatisch.
 
-## Start
+### Release herunterladen und starten
 
-PowerShell im Projektordner:
+Lade die fertige `Anno117PipeHub.exe` von der Seite [GitHub Releases](https://github.com/CommanderLeander/Anno-117-Pipe-Hub/releases) herunter. Die Release-EXE ist self-contained; zum Verwenden werden weder das .NET 8 SDK noch PowerShell benötigt.
+
+Starte Anno 117 mit dem Startargument `/pipe` und danach `Anno117PipeHub.exe`. Der Hub öffnet den Browser derzeit nicht automatisch. Öffne während des Betriebs das Dashboard manuell unter `http://127.0.0.1:8765/`. Der Hub muss während der Nutzung des Dashboards oder WebSockets geöffnet bleiben.
+
+Der Daten-WebSocket ist standardmäßig `ws://127.0.0.1:8766/ws` und wird in der Dashboard-GUI konfiguriert. Standardmäßig bindet er nur an Loopback. LAN-Modus bindet ausschließlich an eine ausgewählte private IPv4-Adresse und verlangt ein Token. Port, LAN-Modus und Adresse liegen in `config\hub-settings.json` relativ zu `AppContext.BaseDirectory`; das Token existiert nur im Arbeitsspeicher und wird nach jedem Neustart neu erzeugt. Es wird nicht in Dateien, Logs, URLs, Cookies oder Browser-Speicher geschrieben. Eine Neugenerierung macht das alte Token sofort ungültig.
+
+Wenn Anno noch nicht läuft, bleibt der Hub geöffnet und versucht die Pipe mit begrenztem Backoff erneut zu verbinden.
+
+### Aus dem Quellcode starten
+
+Dieser Weg ist für die Entwicklung und den Start des Hubs aus dem Quellcode gedacht. Dafür wird das .NET 8 SDK benötigt. Führe das Startskript in PowerShell aus dem Projektordner aus:
 
 ```powershell
 .\Start-AnnoPipeHub.ps1
 ```
 
-Das Dashboard bleibt immer unter http://127.0.0.1:8765/ erreichbar. Der Daten-WebSocket ist standardmäßig `ws://127.0.0.1:8766/ws` und wird in der Dashboard-GUI konfiguriert. Standardmäßig bindet er nur an Loopback. LAN-Modus bindet ausschließlich an eine ausgewählte private IPv4-Adresse und verlangt ein Token. Port, LAN-Modus und Adresse liegen in `config\hub-settings.json`; das Token liegt getrennt in `config\hub-token.bin` und wird für den aktuellen Windows-Benutzer mit Windows-DPAPI verschlüsselt. Es wird nicht in der JSON-Datei, in Logs, URLs, Cookies oder Browser-Speicher geschrieben. Eine Neugenerierung macht das alte Token sofort ungültig.
+Das Startskript startet den Hub und öffnet `http://127.0.0.1:8765/` im Browser. Der Hub muss während der Nutzung geöffnet bleiben. Das Skript startet Anno nicht automatisch.
 
-Wenn Anno noch nicht läuft, bleibt der Hub geöffnet und versucht die Pipe mit begrenztem Backoff erneut zu verbinden.
+### Konfigurationspfad
+
+Die Einstellungsdatei wird immer als `Path.Combine(AppContext.BaseDirectory, "config", "hub-settings.json")` aufgelöst. Bei `dotnet run` ist `AppContext.BaseDirectory` typischerweise `src\AnnoPipeHub\bin\Debug\net8.0\` (oder `Release\net8.0\`); die Entwicklungsdatei liegt daher in dessen Unterordner `config\`. Bei der veröffentlichten Single-File-EXE liegt sie neben der EXE unter `publish\win-x64\config\hub-settings.json`. `config\hub-settings.example.json` im Repository ist nur eine Vorlage.
 
 ## Diagnose- und Datei-Log
 
@@ -89,7 +113,7 @@ Die lokale Debug-Konsole zeigt die tatsächlich empfangenen Pipe-Ereignisse, dek
 
 Rohdaten als Hex werden standardmäßig nicht in die Datei geschrieben. Für ausdrücklich gewünschtes Raw-Logging kann der Prozess mit `ANNO117PIPEHUB_RAW_LOG=1` gestartet werden. Beim Ausschalten wird die Datei sauber geflusht und geschlossen; bereits geschriebene Logs bleiben erhalten. Kann der Hub neben der EXE nicht schreiben, zeigt das Dashboard eine lokalisierte Warnung und verwendet keinen stillen Fallback-Pfad. Tokens und Zugangsdaten werden nicht protokolliert.
 
-## Release-Publish
+### Release aus dem Quellcode erstellen
 
 ```powershell
 .\Publish-Windows.ps1
