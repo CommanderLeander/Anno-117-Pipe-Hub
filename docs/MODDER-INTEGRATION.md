@@ -25,7 +25,7 @@ Port `8766` is the default data-listener port and can be changed in the dashboar
 
 The Hub provides a read-only WebSocket endpoint. A normal HTTP request to `/ws` is not a data connection. Clients must not open `\\.\pipe\anno117` themselves.
 
-In LAN mode, send `{"type":"auth","token":"<token from the dashboard>"}` as the first WebSocket message within 10 seconds. The token authenticates the connection but does not encrypt `ws://`; use a trusted private network only.
+In LAN mode, receive messages directly after opening the WebSocket. The connection uses unencrypted `ws://`; use a trusted private network only.
 
 ## JSON contract
 
@@ -44,11 +44,7 @@ The numeric GUIDs become JSON string keys and the values are integer amounts. Cl
 
 1. Open a WebSocket on the configured host and port.
 2. In loopback mode, receive text messages directly.
-3. In LAN mode, send an auth object within 10 seconds as the first message:
-
-   ```json
-   {"type":"auth","token":"<token from the dashboard>"}
-   ```
+3. In LAN mode, receive messages directly; no authentication object is required.
 
 4. After a successful connection, the client receives `hub.status` first.
 5. The Hub then sends `state.snapshot` with its current in-memory state.
@@ -76,9 +72,9 @@ The dashboard can select a private IPv4 address and port, for example:
 ws://192.168.0.50:8767/ws
 ```
 
-The LAN client must send the dashboard token as its first WebSocket message. The token is displayed in the dashboard and can be regenerated there. A missing or incorrect token is rejected; status and snapshot are sent only after authentication.
+LAN clients do not send an authentication message. Status and snapshot are sent immediately after the WebSocket connection is established.
 
-LAN intentionally uses unencrypted `ws://`, not `wss://`. The token authenticates the connection but does not encrypt the token or game data. Use LAN only on a trusted private network. The Hub does not create Windows Firewall rules or router port forwarding.
+LAN intentionally uses unencrypted `ws://`, not `wss://`. Use LAN only on a trusted private network. The Hub does not create Windows Firewall rules or router port forwarding.
 
 ## JSON message format
 
@@ -125,9 +121,7 @@ The numeric GUIDs are JSON string keys and the values are integer amounts. Dupli
 
 ## Client examples and reconnect
 
-The JavaScript and .NET examples below connect only to the Hub, handle reconnects, and never open the game pipe. They validate `schemaVersion`, handle unknown events defensively, and use bounded reconnect backoff. In LAN mode, send the auth object from the WebSocket `onopen` handler before processing Hub messages.
-
-For .NET clients, use `ClientWebSocket`, support fragmented text messages, and cancel the receive loop during shutdown. The example project is available under [examples/dotnet-client](../examples/dotnet-client/).
+The JavaScript and client examples below connect only to the Hub, handle reconnects, and never open the game pipe. They validate `schemaVersion`, handle unknown events defensively, and use bounded reconnect backoff.
 
 ## Troubleshooting
 
@@ -137,7 +131,7 @@ For .NET clients, use `ClientWebSocket`, support fragmented text messages, and c
 | Game started without `/pipe` | Start Anno 117 with `/pipe`; without it the Hub remains in `Waiting` and retries. |
 | Wrong port | Check the dashboard. The data port is not the dashboard port; the default is `8766`. |
 | Connection refused | Check the Hub, listener state, host, port, and local firewall. Test loopback first. |
-| LAN authentication failed | Copy the exact dashboard token and send it as the first message. |
+| LAN connection unavailable | Check the selected private IPv4 address and local firewall. |
 | No statistics | Check pipe connection, `/pipe`, active session, and `state.snapshot`. The Hub creates no synthetic data. |
 | Unknown event or schema | Ignore it defensively or log it; currently only `schemaVersion: 1` is implemented. |
 | Slow client | Keep the receive loop running. Older messages may be dropped from the 64-message queue; read a fresh snapshot after reconnect. |
@@ -157,8 +151,7 @@ The companion app should validate and filter Hub JSON events and should not open
 - [ ] Hub started and dashboard reachable.
 - [ ] Anno 117 started with `/pipe`.
 - [ ] Correct WebSocket URL and data port used.
-- [ ] LAN mode: private address, token, and lack of TLS understood.
-- [ ] First LAN message is exactly one auth object.
+- [ ] LAN mode: private address and lack of TLS understood.
 - [ ] `schemaVersion === 1` and `type` checked defensively.
 - [ ] `hub.status` and `state.snapshot` handled on connection.
 - [ ] All known live event types handled.
@@ -168,7 +161,7 @@ The companion app should validate and filter Hub JSON events and should not open
 - [ ] No direct named-pipe connection from the mod or client.
 - [ ] No assumptions about GUID names, timestamp units, or numeric units without verification.
 
-The German section below contains the same detailed JavaScript and .NET code examples.
+The German section below contains the same detailed JavaScript examples.
 
 ---
 
@@ -215,11 +208,7 @@ Der Endpunkt ist ein WebSocket-Endpunkt. Ein normaler HTTP-Request auf `/ws` wir
 
 1. WebSocket auf dem konfigurierten Host und Port öffnen.
 2. Im Loopback-Modus direkt Textnachrichten empfangen.
-3. Im LAN-Modus innerhalb von 10 Sekunden als erste Nachricht ein Auth-Objekt senden:
-
-   ```json
-   {"type":"auth","token":"<Token aus dem Dashboard>"}
-   ```
+3. Im LAN-Modus direkt Nachrichten empfangen; ein Auth-Objekt ist nicht erforderlich.
 
 4. Bei erfolgreicher Verbindung erhält der Client zunächst ein `hub.status`-Ereignis.
 5. Danach folgt `state.snapshot` mit dem aktuell im Hub gehaltenen Zustand.
@@ -247,9 +236,9 @@ Im Dashboard kann eine konkrete private IPv4-Adresse und ein Port ausgewählt we
 ws://192.168.0.50:8767/ws
 ```
 
-Der LAN-Client muss als erste WebSocket-Nachricht das Token senden. Das Token wird im Dashboard angezeigt und kann dort neu erzeugt werden. Ein falsches oder fehlendes Token wird abgewiesen; nach erfolgreicher Authentifizierung werden erst Status und Snapshot gesendet.
+LAN-Clients senden keine Authentifizierungsnachricht. Nach dem Verbinden werden Status und Snapshot direkt gesendet.
 
-LAN verwendet absichtlich `ws://`, nicht TLS-verschlüsseltes `wss://`. Das Token authentifiziert die Verbindung, verschlüsselt aber weder das Token noch die Spieldaten. Verwende LAN nur in einem vertrauenswürdigen privaten Netzwerk. Der Hub richtet keine Windows-Firewall-Regel ein und konfiguriert keine Router-Portweiterleitung.
+LAN verwendet absichtlich unverschlüsseltes `ws://`, nicht TLS-verschlüsseltes `wss://`. Verwende LAN nur in einem vertrauenswürdigen privaten Netzwerk. Der Hub richtet keine Windows-Firewall-Regel ein und konfiguriert keine Router-Portweiterleitung.
 
 ## JSON-Grundformat
 
@@ -489,103 +478,15 @@ connect();
 </script>
 ```
 
-Für den LAN-Modus muss `socket.onopen` vor dem Empfang der Hub-Nachrichten die Auth-Nachricht senden:
+Im LAN-Modus können Nachrichten direkt nach `socket.onopen` empfangen werden:
 
 ```js
 socket.onopen = () => {
-  socket.send(JSON.stringify({ type: "auth", token: lanToken }));
+  console.log("WebSocket verbunden");
 };
 ```
 
-`lanToken` muss aus der Dashboard-Konfiguration stammen. Nicht in Quellcode, Logs oder öffentlich verteilte Mod-Dateien einbetten.
-
-## C# mit `ClientWebSocket`
-
-Das folgende .NET-8-Beispiel nutzt ausschließlich `ClientWebSocket`, behandelt Fragmentierung und unbekannte JSON-Nachrichten und verwendet einen begrenzten Reconnect-Backoff:
-
-```csharp
-using System.Net.WebSockets;
-using System.Text;
-using System.Text.Json;
-
-var endpointText = args.Length > 0 ? args[0] : "ws://127.0.0.1:8766/ws";
-var token = args.Length > 1 ? args[1] : null;
-using var stop = new CancellationTokenSource();
-Console.CancelKeyPress += (_, e) => { e.Cancel = true; stop.Cancel(); };
-
-var retry = 0;
-while (!stop.IsCancellationRequested)
-{
-    using var socket = new ClientWebSocket();
-    try
-    {
-      var endpoint = new Uri(endpointText);
-        await socket.ConnectAsync(endpoint, stop.Token);
-        if (!string.IsNullOrWhiteSpace(token))
-            await SendJsonAsync(socket, new { type = "auth", token }, stop.Token);
-
-        retry = 0;
-        while (socket.State == WebSocketState.Open && !stop.IsCancellationRequested)
-        {
-            var text = await ReceiveTextAsync(socket, stop.Token);
-            if (text is null) break;
-
-            try
-            {
-                using var document = JsonDocument.Parse(text);
-                var root = document.RootElement;
-                if (!root.TryGetProperty("schemaVersion", out var version) || version.GetInt32() != 1)
-                    continue;
-                if (!root.TryGetProperty("type", out var typeElement)) continue;
-
-                switch (typeElement.GetString())
-                {
-                    case "hub.status": Console.WriteLine($"Status: {root}"); break;
-                    case "state.snapshot": Console.WriteLine($"Snapshot: {root}"); break;
-                    case "session.start": Console.WriteLine($"Session start: {root}"); break;
-                    case "session.end": Console.WriteLine("Session end"); break;
-                    case "area.production.statistics": Console.WriteLine($"Statistics: {root}"); break;
-                    default: Console.WriteLine($"Unknown event ignored: {typeElement}"); break;
-                }
-            }
-            catch (JsonException) { Console.WriteLine("Invalid JSON ignored."); }
-        }
-    }
-    catch (OperationCanceledException) when (stop.IsCancellationRequested) { break; }
-    catch (WebSocketException exception) { Console.WriteLine($"WebSocket error: {exception.Message}"); }
-    catch (UriFormatException exception) { Console.WriteLine($"Invalid endpoint: {exception.Message}"); break; }
-
-    if (!stop.IsCancellationRequested)
-    {
-        var delay = TimeSpan.FromMilliseconds(Math.Min(2000 * Math.Pow(2, retry), 10000));
-        retry = Math.Min(retry + 1, 10);
-        await Task.Delay(delay, stop.Token);
-    }
-}
-
-static async Task SendJsonAsync(ClientWebSocket socket, object value, CancellationToken token)
-{
-    var bytes = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(value));
-    await socket.SendAsync(bytes, WebSocketMessageType.Text, true, token);
-}
-
-static async Task<string?> ReceiveTextAsync(ClientWebSocket socket, CancellationToken token)
-{
-    using var buffer = new MemoryStream();
-    var chunk = new byte[8192];
-    WebSocketReceiveResult result;
-    do
-    {
-        result = await socket.ReceiveAsync(chunk, token);
-        if (result.MessageType == WebSocketMessageType.Close) return null;
-        if (result.MessageType != WebSocketMessageType.Text) continue;
-        buffer.Write(chunk, 0, result.Count);
-    } while (!result.EndOfMessage);
-    return Encoding.UTF8.GetString(buffer.ToArray());
-}
-```
-
-Im LAN-Modus wird der Token als zweites Kommandozeilenargument übergeben. Das bestehende Beispielprojekt unter [examples/dotnet-client](../examples/dotnet-client/) zeigt denselben grundlegenden Clientvertrag.
+LAN hat keine Anwendungsauthentifizierung. Verwende den LAN-Modus nur in einem vertrauenswürdigen privaten Netzwerk.
 
 ## Fehlerbilder und Lösungen
 
@@ -595,7 +496,7 @@ Im LAN-Modus wird der Token als zweites Kommandozeilenargument übergeben. Das b
 | Spiel ohne `/pipe` | Anno 117 mit dem Startargument `/pipe` starten. Ohne Pipe bleibt der Pipe-Status `Waiting`; der Hub wartet mit Reconnect. |
 | Falscher Port | Den Port im Dashboard prüfen. Der Datenport ist nicht der Dashboard-Port. Standard: `8766`. |
 | Verbindung abgelehnt | Hub läuft nicht, der Listener startet gerade, falscher Host/Port oder lokale Firewall blockiert. Erst Loopback testen. |
-| LAN-Authentifizierung fehlgeschlagen | Token exakt aus dem Dashboard übernehmen und als erste Nachricht senden. Ein falsches Token wird geschlossen. |
+| LAN-Verbindung nicht erreichbar | Ausgewählte private IPv4-Adresse und lokale Firewall prüfen. |
 | Keine Statistikdaten | Pipe-Verbindung, `/pipe`, Sitzung und den `state.snapshot` prüfen. Es gibt keine künstlichen Daten und keine garantierten Einheiten. |
 | Unbekannter Eventtyp | Nachricht nicht als bekannten Typ verarbeiten, loggen oder ignorieren. Zusätzliche Felder sind erlaubt. |
 | Unbekannte Schema-Version | Nachricht kontrolliert ignorieren und keine Annahmen über Felder treffen. Aktuell ist nur `schemaVersion: 1` implementiert. |
@@ -618,8 +519,7 @@ Die Companion-App verbindet sich mit dem Hub, validiert und filtert die JSON-Ere
 - [ ] Hub gestartet und Dashboard erreichbar.
 - [ ] Anno 117 mit `/pipe` gestartet.
 - [ ] Korrekte WebSocket-URL und Port verwendet.
-- [ ] LAN-Modus: private Adresse, Token und fehlendes TLS berücksichtigt.
-- [ ] Erste LAN-Nachricht ist exakt ein Auth-Objekt.
+- [ ] LAN-Modus: private Adresse und fehlendes TLS berücksichtigt.
 - [ ] `schemaVersion === 1` und `type` defensiv geprüft.
 - [ ] `hub.status` und `state.snapshot` beim Verbindungsaufbau verarbeitet.
 - [ ] Alle bekannten Live-Eventtypen verarbeitet.

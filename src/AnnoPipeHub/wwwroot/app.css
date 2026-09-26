@@ -91,12 +91,8 @@ button:hover { background: var(--green-hover); }
 button:focus-visible, input:focus-visible, select:focus-visible { outline: 3px solid var(--amber); outline-offset: 2px; }
 .language-switch button { color: var(--muted); background: transparent; border-color: transparent; }
 .language-switch button:hover { color: var(--green); background: transparent; }
-.addresses, .token-box { display: grid; gap: 8px; margin-top: 22px; font: 13px "Segoe UI", sans-serif; }
+.addresses { display: grid; gap: 8px; margin-top: 22px; font: 13px "Segoe UI", sans-serif; }
 .addresses code { display: block; width: max-content; max-width: 100%; padding: 7px 9px; background: var(--code); overflow: auto; }
-.token-box { background: var(--warning); border-left: 4px solid var(--amber); padding: 14px; }
-.token-box div { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
-.token-box button { min-height: 30px; padding: 5px 9px; }
-.token-box p { color: var(--muted); }
 .warning { margin-top: 18px; padding: 14px; background: var(--warning); border: 1px solid var(--amber); font: 13px/1.5 "Segoe UI", sans-serif; }
 .form-error { color: var(--red); margin-top: 12px; font: 13px "Segoe UI", sans-serif; }
 .clients-panel { margin: 0 0 18px; padding: 16px 20px; border: 1px solid var(--line); background: var(--surface-soft); font: 13px "Segoe UI", sans-serif; }

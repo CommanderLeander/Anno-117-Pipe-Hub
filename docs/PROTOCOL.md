@@ -61,7 +61,7 @@ JSON object keys are the numeric GUIDs converted to strings by JSON serializatio
 
 ## Authentication
 
-Local mode requires no authentication. In LAN mode, send `{"type":"auth","token":"..."}` once before any Hub data. This is a client-to-Hub handshake, not a Hub event. A wrong, missing, invalid, or late token causes disconnection without data. Tokens are not written to URLs or logs.
+Local and LAN mode require no WebSocket authentication. After connecting, the client receives `hub.status`, `state.snapshot`, and subsequent Hub events.
 
 ---
 
@@ -121,4 +121,4 @@ Die Maps des Binärprotokolls werden als JSON-Objekte ausgegeben. Die numerische
 
 ## Authentifizierung
 
-Im lokalen Modus ist keine Authentifizierung erforderlich. Im LAN-Modus sendet der Client vor allen Hub-Daten einmalig `{"type":"auth","token":"..."}`. Das Auth-Objekt ist ein Client-zu-Hub-Handshake und keine Hub-Ereignisnachricht. Falsches, fehlendes, ungültiges oder zu spätes Token führt zur Trennung ohne Daten. Tokens werden nicht in URLs oder Logs geschrieben.
+Im lokalen und im LAN-Modus ist keine WebSocket-Authentifizierung erforderlich. Nach dem Verbinden empfängt der Client zuerst `hub.status`, `state.snapshot` und danach die laufenden Hub-Ereignisse.

@@ -23,4 +23,4 @@ labels: bug
 
 ## Logs and diagnostics
 
-<!-- Remove tokens, personal data, private paths, and sensitive logs before posting. -->
+<!-- Remove credentials, personal data, private paths, and sensitive logs before posting. -->

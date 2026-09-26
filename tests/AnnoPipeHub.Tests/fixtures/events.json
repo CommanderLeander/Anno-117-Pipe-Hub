@@ -1,7 +1,0 @@
-[
- {"schemaVersion":1,"type":"hub.status","receivedAtUtc":"2026-09-25T12:00:00Z","hub":{"status":{"hubStatus":"Ready","pipeStatus":"Connected","connectedClients":1,"lastMessageAtUtc":null,"protocolVersion":2,"error":null},"listener":{"lanEnabled":false,"bindAddress":"127.0.0.1","port":8766,"state":"Listening","connectedClients":1,"error":null}}},
- {"schemaVersion":1,"type":"state.snapshot","receivedAtUtc":"2026-09-25T12:00:00Z","snapshots":[]},
- {"schemaVersion":1,"type":"session.start","receivedAtUtc":"2026-09-25T12:00:00Z","session":{"sessionName":"Testsession"}},
- {"schemaVersion":1,"type":"session.end","receivedAtUtc":"2026-09-25T13:00:00Z"},
- {"schemaVersion":1,"type":"area.production.statistics","receivedAtUtc":"2026-09-25T12:01:00Z","statistics":{"sessionId":1,"islandId":2,"areaIndex":0,"sessionGuid":123456,"areaName":"North Sea","rawTimestamp":987654321,"entries":[{"productGuid":42,"productGeneration":10.0,"productConsumption":2.0,"productDelta":8.0,"perfectProductGeneration":12.0,"perfectProductConsumption":1.0,"amountOfBuildings":3,"totalMaintenance":4,"totalIncome":100.5,"totalProfit":90,"summedProductivity":5.5,"averageProductivity":4.5,"workforceGuidToAmount":{"500":12},"buildingGuidToAmount":{"600":3}}]}}
-]

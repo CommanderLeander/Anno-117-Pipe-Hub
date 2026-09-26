@@ -1,8 +1,5 @@
 $ErrorActionPreference = 'Stop'
 $root = $PSScriptRoot
-$env:DOTNET_CLI_HOME = Join-Path $root '.local\dotnet-home'
-$env:NUGET_PACKAGES = Join-Path $root '.local\nuget\packages'
-$env:NUGET_HTTP_CACHE_PATH = Join-Path $root '.local\nuget\http-cache'
 $env:TEMP = Join-Path $root '.local\tmp'
 $env:TMP = $env:TEMP
 $output = Join-Path $root 'publish\win-x64'
@@ -10,11 +7,14 @@ $staging = Join-Path $root 'publish\.staging-win-x64'
 $backup = Join-Path $root 'publish\.previous-win-x64'
 if (Test-Path $staging) { Remove-Item $staging -Recurse -Force }
 New-Item -ItemType Directory -Force -Path $staging | Out-Null
-dotnet publish (Join-Path $root 'src\AnnoPipeHub\AnnoPipeHub.csproj') -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:EnableCompressionInSingleFile=true -o $staging
+$env:CGO_ENABLED = '0'
+$env:GOOS = 'windows'
+$env:GOARCH = 'amd64'
+go build -trimpath -ldflags '-s -w' -o (Join-Path $staging 'Anno117PipeHub.exe') (Join-Path $root 'main.go')
 $publishExitCode = $LASTEXITCODE
 if ($publishExitCode -ne 0) {
 	Remove-Item $staging -Recurse -Force -ErrorAction SilentlyContinue
-	throw "dotnet publish ist mit Exitcode $publishExitCode fehlgeschlagen. Die bisherige Ausgabe wurde erhalten."
+	throw "go build ist mit Exitcode $publishExitCode fehlgeschlagen. Die bisherige Ausgabe wurde erhalten."
 }
 $stagingExe = Join-Path $staging 'Anno117PipeHub.exe'
 if (-not (Test-Path $stagingExe -PathType Leaf) -or (Get-Item $stagingExe).Length -le 0) {

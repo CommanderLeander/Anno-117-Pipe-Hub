@@ -1,20 +1,17 @@
-# .NET build output
+# Go build output
 **/bin/
 **/obj/
 
-# Local SDK, NuGet, and temporary tooling state
+# Local tooling and temporary state
 .local/
-.nuget/
 [Tt]emp/
 [Tt]mp/
 *.user
 *.suo
 *.userosscache
-*.sln.docstates
 
 # Runtime configuration and secrets
 /config/hub-settings.json
-/config/hub-token.bin
 config/*.json
 config/*.bin
 **/config/*.json

@@ -1,8 +1,6 @@
 This example code demonstrates how to read statistics screen data from the **Anno 117** pipe.
 It establishes a connection with the game via a Windows pipe, reads statistics data and displays it in raw format using ImGUI.
 
-![Example](example.png)
-
 ## Experimental Feature
 The pipe interface is provided as an easter egg and is primarily intended for curiosity, experimentation, and community-made tools.
 It should not be considered an official or supported API, and compatibility across game versions is not guaranteed.
@@ -36,6 +34,3 @@ See `pipe.cpp` for the communication protocol.
 ## Activation
 The pipe can be activated by adding the launch argument `/pipe` to the game.
 Statistics data is sent periodically to the pipe.
-
-## Build
-The script `build.ps1` can be used to build the sample in a Visual Studio command line.

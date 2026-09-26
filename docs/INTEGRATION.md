@@ -10,21 +10,21 @@ By default:
 ws://127.0.0.1:8766/ws
 ```
 
-The administration dashboard remains local at `http://127.0.0.1:8765/`. The GUI can select the port and, optionally, a specific private IPv4 address. LAN clients might then use `ws://192.168.1.25:8766/ws`.
+The administration dashboard remains local at `http://127.0.0.1:8765/`. The GUI can select the port and, optionally, a specific private IPv4 address. LAN mode keeps the local `127.0.0.1` endpoint and adds the selected private IPv4 endpoint, for example `ws://192.168.1.25:8766/ws`.
 
-The settings file is resolved from the process base directory: `Path.Combine(AppContext.BaseDirectory, "config", "hub-settings.json")`. For `dotnet run`, this is typically `src\AnnoPipeHub\bin\Debug\net8.0\config\hub-settings.json` (or the corresponding Release output). For the published single-file EXE, it is `publish\win-x64\config\hub-settings.json` beside the EXE. The repository example file is a template and is not read from the repository root.
+The settings file is resolved from the executable directory as `config\hub-settings.json`. With `go run .`, this is a temporary executable directory; for the published single-binary EXE, it is `publish\win-x64\config\hub-settings.json` beside the EXE. The repository example file is a template and is not read from the repository root.
 
 ## Connection
 
 1. Open a WebSocket.
 2. In local mode, read JSON messages directly.
-3. In LAN mode, send `{"type":"auth","token":"<token>"}` within 10 seconds as the first message.
-4. After successful authentication, `hub.status` is sent first, followed by `state.snapshot`.
+3. In LAN mode, receive messages directly; no authentication message is required.
+4. `hub.status` is sent first, followed by `state.snapshot`.
 5. New live events follow.
 
-LAN intentionally uses `ws://`: tokens and game data are not encrypted. The token is authentication, not encryption. Use trusted private networks only and do not configure router port forwarding. A local firewall rule may be required; the Hub does not change the Windows Firewall automatically.
+LAN intentionally uses unencrypted `ws://`; use trusted private networks only and do not configure router port forwarding. A local firewall rule may be required; the Hub does not change the Windows Firewall automatically.
 
-The WebSocket accepts the dashboard origin `http://127.0.0.1:8765` and native clients without an `Origin` header. Other browser origins are rejected. LAN authentication is still required for the dashboard origin. Dashboard POST requests for settings, token regeneration, debug-log clearing, and file logging use the same origin rule; no broad CORS policy is enabled.
+The WebSocket accepts the dashboard origin `http://127.0.0.1:8765` and native clients without an `Origin` header. Other browser origins are rejected. Dashboard POST requests for settings, debug-log clearing, and file logging use the same origin rule; no broad CORS policy is enabled.
 
 After an interruption, reconnect with bounded backoff. Each reconnect receives a current snapshot again. State is kept in memory only; restarting the Hub discards old session data.
 
@@ -44,7 +44,7 @@ socket.onmessage = event => {
 };
 ```
 
-For LAN, send the authentication message from the client's `onopen` handler. See [browser-client.html](../examples/browser-client.html) and [dotnet-client](../examples/dotnet-client/).
+For LAN, receive messages directly after the client's `onopen` handler. With the Hub running, open the browser example at `http://127.0.0.1:8765/examples/browser-client.html`; it is served by the dashboard origin.
 
 ---
 
@@ -60,21 +60,21 @@ Standardmäßig:
 ws://127.0.0.1:8766/ws
 ```
 
-Das Verwaltungs-Dashboard bleibt immer lokal unter `http://127.0.0.1:8765/`. In der GUI können Port und optional eine konkrete private IPv4-Adresse gewählt werden. LAN-Clients verwenden dann beispielsweise `ws://192.168.1.25:8766/ws`.
+Das Verwaltungs-Dashboard bleibt immer lokal unter `http://127.0.0.1:8765/`. In der GUI können Port und optional eine konkrete private IPv4-Adresse gewählt werden. Im LAN-Modus bleibt `ws://127.0.0.1:8766/ws` erreichbar und zusätzlich können LAN-Clients beispielsweise `ws://192.168.1.25:8766/ws` verwenden.
 
-Die Einstellungsdatei wird aus dem Prozess-Basisverzeichnis aufgelöst: `Path.Combine(AppContext.BaseDirectory, "config", "hub-settings.json")`. Bei `dotnet run` ist das typischerweise `src\AnnoPipeHub\bin\Debug\net8.0\config\hub-settings.json` (oder das entsprechende Release-Verzeichnis). Bei der veröffentlichten Single-File-EXE liegt sie neben der EXE unter `publish\win-x64\config\hub-settings.json`. Die Beispiel-Datei im Repository ist nur eine Vorlage und wird nicht aus dem Repository-Stamm gelesen.
+Die Einstellungsdatei wird relativ zum Verzeichnis der ausführbaren Datei unter `config\hub-settings.json` aufgelöst. Bei `go run .` liegt sie im temporären Go-Ausgabeverzeichnis; bei der veröffentlichten EXE liegt sie neben der EXE unter `publish\win-x64\config\hub-settings.json`. Die Beispiel-Datei im Repository ist nur eine Vorlage und wird nicht aus dem Repository-Stamm gelesen.
 
 ## Verbindung
 
 1. WebSocket öffnen.
 2. Im lokalen Modus direkt JSON-Nachrichten lesen.
-3. Im LAN-Modus innerhalb von 10 Sekunden zuerst senden: `{"type":"auth","token":"<token>"}`.
-4. Nach erfolgreicher Authentifizierung kommen zuerst `hub.status`, danach `state.snapshot`.
+3. Im LAN-Modus direkt Nachrichten empfangen; eine Authentifizierungsnachricht ist nicht erforderlich.
+4. Zuerst kommen `hub.status`, danach `state.snapshot`.
 5. Neue Live-Ereignisse folgen danach.
 
-LAN nutzt absichtlich `ws://`: Token und Spieldaten sind nicht verschlüsselt. Das Token ist keine Verschlüsselung. Nur vertrauenswürdige private Netzwerke verwenden, keine Router-Portweiterleitung einrichten. Eine Firewall-Regel kann lokal erforderlich sein; der Hub ändert die Windows-Firewall nicht automatisch.
+LAN nutzt absichtlich unverschlüsseltes `ws://`. Nur vertrauenswürdige private Netzwerke verwenden, keine Router-Portweiterleitung einrichten. Eine Firewall-Regel kann lokal erforderlich sein; der Hub ändert die Windows-Firewall nicht automatisch.
 
-Der WebSocket akzeptiert den Dashboard-Origin `http://127.0.0.1:8765` und native Clients ohne `Origin`-Header. Andere Browser-Origins werden abgelehnt. Die LAN-Authentifizierung bleibt auch für den Dashboard-Origin erforderlich. Dashboard-POSTs für Einstellungen, Token-Neugenerierung, Debug-Log-Leeren und Datei-Logging verwenden dieselbe Origin-Regel; es gibt kein breites CORS.
+Der WebSocket akzeptiert den Dashboard-Origin `http://127.0.0.1:8765` und native Clients ohne `Origin`-Header. Andere Browser-Origins werden abgelehnt. Dashboard-POSTs für Einstellungen, Debug-Log-Leeren und Datei-Logging verwenden dieselbe Origin-Regel; es gibt kein breites CORS.
 
 Nach einer Unterbrechung kontrolliert neu verbinden. Jeder Reconnect erhält wieder einen aktuellen Snapshot. Der Zustand liegt nur im Arbeitsspeicher; ein Hub-Neustart verwirft alte Sitzungsdaten.
 
@@ -94,4 +94,4 @@ socket.onmessage = event => {
 };
 ```
 
-Für LAN ergänzt der Client im `onopen`-Handler die Authentifizierungsnachricht. Siehe [browser-client.html](../examples/browser-client.html) und [dotnet-client](../examples/dotnet-client/).
+Für LAN empfängt der Client nach `onopen` direkt Nachrichten. Öffne das Browser-Beispiel bei laufendem Hub unter `http://127.0.0.1:8765/examples/browser-client.html`; es wird vom Dashboard-Origin bereitgestellt.
