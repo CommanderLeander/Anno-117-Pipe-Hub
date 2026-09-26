@@ -12,7 +12,7 @@ Anno 117 Pipe Hub is a community project and is not an official Ubisoft product.
 
 ### Run a release
 
-Download the finished ZIP release package from the [GitHub Releases](https://github.com/CommanderLeander/Anno-117-Pipe-Hub/releases) page. It contains the standalone Go executable `Anno117PipeHub.exe`, which requires neither Go nor PowerShell, plus `LICENSE` and `THIRD_PARTY_NOTICES.md` in the ZIP root. Distribute the complete ZIP contents together.
+Download the finished ZIP release package from the [GitHub Releases](https://github.com/CommanderLeander/Anno-117-Pipe-Hub/releases) page. It contains the standalone Go executable `Anno117PipeHub.exe`, `LICENSE`, and `THIRD_PARTY_NOTICES.md` in the ZIP root. Distribute the complete ZIP contents together.
 
 Start `Anno117PipeHub.exe` whenever convenient; the Hub can start before Anno 117 and waits for the pipe. When you start Anno 117, it must use the `/pipe` launch argument. The Hub does not open the browser automatically. While it is running, open the dashboard manually at `http://127.0.0.1:8765/`. Keep the Hub open while using the dashboard or WebSocket.
 
@@ -46,7 +46,7 @@ Raw data in hexadecimal is not written to files by default. Explicit raw logging
 .\Publish-Windows.ps1
 ```
 
-The output is placed in `publish\win-x64`, and the release archive is `publish\Anno117PipeHub-windows-x64.zip`. The ZIP contains the standalone Go single-file Windows x64 application `Anno117PipeHub.exe`, plus `LICENSE` and `THIRD_PARTY_NOTICES.md` in its root. No Go installation is required to run the EXE; distribute the ZIP contents together.
+The output is placed in `publish\win-x64`, and the release archive is `publish\Anno117PipeHub-windows-x64.zip`. The ZIP contains exactly the standalone Go single-file Windows x64 application `Anno117PipeHub.exe`, `LICENSE`, and `THIRD_PARTY_NOTICES.md` in its root. No Go installation is required to run the EXE; distribute the ZIP contents together.
 
 ### Message format
 
@@ -80,7 +80,7 @@ Anno 117 Pipe Hub ist ein Community-Projekt und kein offizielles Ubisoft-Produkt
 
 ### Release herunterladen und starten
 
-Lade das fertige ZIP-Release-Paket von der Seite [GitHub Releases](https://github.com/CommanderLeander/Anno-117-Pipe-Hub/releases) herunter. Es enthält die eigenständige Go-Einzeldatei `Anno117PipeHub.exe`, für deren Ausführung weder Go noch PowerShell benötigt werden, sowie `LICENSE` und `THIRD_PARTY_NOTICES.md` im ZIP-Hauptverzeichnis. Der vollständige ZIP-Inhalt muss zusammen verteilt werden.
+Lade das fertige ZIP-Release-Paket von der Seite [GitHub Releases](https://github.com/CommanderLeander/Anno-117-Pipe-Hub/releases) herunter. Es enthält die eigenständige Go-Einzeldatei `Anno117PipeHub.exe`, `LICENSE` und `THIRD_PARTY_NOTICES.md` im ZIP-Hauptverzeichnis. Der vollständige ZIP-Inhalt muss zusammen verteilt werden.
 
 Starte `Anno117PipeHub.exe`, wann es passt; der Hub kann vor Anno 117 gestartet werden und wartet auf die Pipe. Wenn du Anno 117 startest, muss es das Startargument `/pipe` verwenden. Der Hub öffnet den Browser derzeit nicht automatisch. Öffne während des Betriebs das Dashboard manuell unter `http://127.0.0.1:8765/`. Der Hub muss während der Nutzung des Dashboards oder WebSockets geöffnet bleiben.
 
@@ -114,7 +114,7 @@ Rohdaten als Hex werden standardmäßig nicht in die Datei geschrieben. Für aus
 .\Publish-Windows.ps1
 ```
 
-Die Ausgabe liegt unter `publish\win-x64`; das Release-ZIP liegt unter `publish\Anno117PipeHub-windows-x64.zip`. Das ZIP enthält die eigenständige Go-Einzeldatei `Anno117PipeHub.exe` sowie `LICENSE` und `THIRD_PARTY_NOTICES.md` im Hauptverzeichnis. Zur Ausführung der EXE ist keine Go-Installation erforderlich; der vollständige ZIP-Inhalt muss zusammen verteilt werden.
+Die Ausgabe liegt unter `publish\win-x64`; das Release-ZIP liegt unter `publish\Anno117PipeHub-windows-x64.zip`. Das ZIP enthält genau die eigenständige Go-Einzeldatei `Anno117PipeHub.exe`, `LICENSE` und `THIRD_PARTY_NOTICES.md` im Hauptverzeichnis. Zur Ausführung der EXE ist keine Go-Installation erforderlich; der vollständige ZIP-Inhalt muss zusammen verteilt werden.
 
 ### Nachrichtenformat
 

@@ -1,0 +1,181 @@
+name: Tagged Windows release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Go tests (${{ matrix.go-version }})
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        go-version: ['1.26.x', '1.27.x']
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ matrix.go-version }}
+
+      - name: Run Go tests
+        run: go test ./...
+
+  build-release:
+    needs: test
+    runs-on: windows-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.27.x'
+
+      - name: Build Windows release package
+        shell: pwsh
+        run: .\Publish-Windows.ps1
+
+      - name: Verify release ZIP contents
+        shell: pwsh
+        run: |
+          Add-Type -AssemblyName System.IO.Compression.FileSystem
+          $zipPath = Join-Path $PWD 'publish\Anno117PipeHub-windows-x64.zip'
+          $expected = @('Anno117PipeHub.exe', 'LICENSE', 'THIRD_PARTY_NOTICES.md')
+          $archive = [System.IO.Compression.ZipFile]::OpenRead($zipPath)
+          try {
+            $actual = @($archive.Entries | ForEach-Object FullName)
+          } finally {
+            $archive.Dispose()
+          }
+          if ((@($actual | Sort-Object) -join '|') -ne (@($expected | Sort-Object) -join '|')) {
+            throw "Unexpected ZIP contents: $($actual -join ', ')"
+          }
+
+      - name: Upload release ZIP artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: anno117pipehub-windows-x64-release
+          path: publish/Anno117PipeHub-windows-x64.zip
+          if-no-files-found: error
+          retention-days: 7
+
+  clamav-scan:
+    needs: build-release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download release ZIP artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: anno117pipehub-windows-x64-release
+          path: release
+
+      - name: Install ClamAV
+        run: sudo apt-get update && sudo apt-get install --yes clamav clamav-freshclam
+
+      - name: Update ClamAV signatures
+        run: |
+          sudo freshclam --stdout --verbose
+          signature_count=$(find /var/lib/clamav -maxdepth 1 -type f \( -name '*.cvd' -o -name '*.cld' \) | wc -l)
+          if [ "$signature_count" -eq 0 ]; then
+            echo 'No ClamAV signature databases found after update.' >&2
+            exit 1
+          fi
+
+      - name: Scan release ZIP and extracted files
+        run: |
+          set -o pipefail
+          zip_path='release/Anno117PipeHub-windows-x64.zip'
+          scan_dir="$RUNNER_TEMP/anno117pipehub-release"
+          mkdir -p "$scan_dir"
+          unzip -q "$zip_path" -d "$scan_dir"
+          expected=$(printf '%s\n' 'Anno117PipeHub.exe' 'LICENSE' 'THIRD_PARTY_NOTICES.md')
+          actual=$(find "$scan_dir" -mindepth 1 -maxdepth 1 -type f -printf '%f\n' | sort)
+          if [ "$actual" != "$(printf '%s\n' "$expected" | sort)" ]; then
+            echo "Unexpected extracted ZIP contents:" >&2
+            printf '%s\n' "$actual" >&2
+            exit 1
+          fi
+
+          set +e
+          clamscan --no-summary --infected "$zip_path"
+          zip_status=$?
+          clamscan --recursive --no-summary --infected "$scan_dir"
+          files_status=$?
+          set -e
+          if [ "$zip_status" -ne 0 ]; then
+            echo "ClamAV ZIP scan failed or detected malware (exit $zip_status)." >&2
+            exit "$zip_status"
+          fi
+          if [ "$files_status" -ne 0 ]; then
+            echo "ClamAV extracted-files scan failed or detected malware (exit $files_status)." >&2
+            exit "$files_status"
+          fi
+
+          scanner_version=$(clamscan --version)
+          signature_stand=$(for database in /var/lib/clamav/*.cvd /var/lib/clamav/*.cld; do
+            [ -f "$database" ] || continue
+            info=$(sigtool --info "$database")
+            version=$(printf '%s\n' "$info" | awk -F': ' '/^Version:/{print $2; exit}')
+            build_time=$(printf '%s\n' "$info" | awk -F': ' '/^Build time:/{print $2; exit}')
+            printf '%s version=%s build=%s; ' "$(basename "$database")" "$version" "$build_time"
+          done)
+          if [ -z "$signature_stand" ]; then
+            echo 'Unable to determine the ClamAV signature stand.' >&2
+            exit 1
+          fi
+          {
+            echo '### Windows release malware scan'
+            echo
+            echo '- Paket: `Anno117PipeHub-windows-x64.zip`'
+            echo "- Scanner: \`$scanner_version\`"
+            echo "- Signaturstand: \`$signature_stand\`"
+            echo '- Ergebnis: **keine Erkennung**'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  publish-release:
+    needs: clamav-scan
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Download tested and scanned release ZIP
+        uses: actions/download-artifact@v4
+        with:
+          name: anno117pipehub-windows-x64-release
+          path: release
+
+      - name: Publish GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          zip_path='release/Anno117PipeHub-windows-x64.zip'
+          release_notes=$(cat <<'EOF'
+          ## Deutsch
+
+          Windows-x64-Release von Anno 117 Pipe Hub. Das ZIP enthält die eigenständige EXE sowie `LICENSE` und `THIRD_PARTY_NOTICES.md`.
+
+          Anno 117 mit `/pipe` starten. Dashboard: `http://127.0.0.1:8765/`. Standard-WebSocket: `ws://127.0.0.1:8766/ws`.
+
+          Der LAN-Modus ist unverschlüsselt und bietet keine Anwendungsauthentifizierung. Nur in vertrauenswürdigen privaten Netzwerken verwenden.
+
+          ## English
+
+          Windows x64 release of Anno 117 Pipe Hub. The ZIP contains the standalone EXE plus `LICENSE` and `THIRD_PARTY_NOTICES.md`.
+
+          Start Anno 117 with `/pipe`. Dashboard: `http://127.0.0.1:8765/`. Default WebSocket: `ws://127.0.0.1:8766/ws`.
+
+          LAN mode is unencrypted and provides no application authentication. Use it only on trusted private networks.
+          EOF
+          )
+          gh release create "$GITHUB_REF_NAME" "$zip_path#Anno117PipeHub-windows-x64.zip" \
+            --verify-tag \
+            --title "Anno 117 Pipe Hub $GITHUB_REF_NAME" \
+            --notes "$release_notes"
