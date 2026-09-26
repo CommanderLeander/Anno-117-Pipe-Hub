@@ -196,7 +196,12 @@ jobs:
           LAN mode is unencrypted and provides no application authentication. Use it only on trusted private networks.
           EOF
           )
+          if [ ! -f "$zip_path" ]; then
+            echo "Release ZIP not found: $zip_path" >&2
+            exit 1
+          fi
           gh release create "$GITHUB_REF_NAME" "$zip_path#Anno117PipeHub-windows-x64.zip" \
+            --repo "$GITHUB_REPOSITORY" \
             --verify-tag \
             --title "Anno 117 Pipe Hub $GITHUB_REF_NAME" \
             --notes "$release_notes"
