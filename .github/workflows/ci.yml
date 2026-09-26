@@ -63,7 +63,7 @@ jobs:
       - name: Update ClamAV signatures
         shell: pwsh
         run: |
-          $clamAvDirectory = Join-Path ${env:ProgramFiles} 'ClamAV'
+          $clamAvDirectory = Join-Path ${env:ProgramData} 'chocolatey\lib\clamav\tools'
           $env:Path = "$clamAvDirectory;$env:Path"
           $freshclam = Join-Path $clamAvDirectory 'freshclam.exe'
           if (-not (Test-Path $freshclam -PathType Leaf)) {
@@ -77,7 +77,7 @@ jobs:
       - name: Scan release ZIP and extracted EXE
         shell: pwsh
         run: |
-          $clamAvDirectory = Join-Path ${env:ProgramFiles} 'ClamAV'
+          $clamAvDirectory = Join-Path ${env:ProgramData} 'chocolatey\lib\clamav\tools'
           $env:Path = "$clamAvDirectory;$env:Path"
           $clamscan = Join-Path $clamAvDirectory 'clamscan.exe'
           $sigtool = Join-Path $clamAvDirectory 'sigtool.exe'
