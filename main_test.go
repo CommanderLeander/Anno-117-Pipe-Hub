@@ -143,6 +143,14 @@ func TestStatisticsFrameUpdatesSnapshotAndWireEvent(t *testing.T) {
 	if snapshot["type"] != "state.snapshot" || len(snapshot["snapshots"].([]any)) != 1 {
 		t.Fatalf("state snapshot = %#v", snapshot)
 	}
+	details, ok := debugDetails(message).(map[string]any)
+	if !ok || details["productionEntryCount"] != 0 {
+		t.Fatalf("debug details = %#v", details)
+	}
+	hub.clearSnapshots()
+	if snapshots := hub.snapshotWire(); len(snapshots) != 0 {
+		t.Fatalf("cleared snapshot count = %d", len(snapshots))
+	}
 }
 
 func TestDecodeRejectsTrailingBytesAndWrongPreamble(t *testing.T) {

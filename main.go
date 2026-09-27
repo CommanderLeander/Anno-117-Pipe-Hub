@@ -252,6 +252,12 @@ func (h *Hub) accept(m DecodedMessage, size int, raw []byte) {
 	h.broadcast(wireMessage(m))
 	h.broadcastStatus()
 }
+func (h *Hub) clearSnapshots() {
+	h.mu.Lock()
+	h.snapshots = map[string]Statistics{}
+	h.mu.Unlock()
+	h.broadcast(map[string]any{"schemaVersion": 1, "type": "state.snapshot", "receivedAtUtc": time.Now().UTC(), "snapshots": []StatisticsEvent{}})
+}
 func (h *Hub) snapshotWire() []StatisticsEvent {
 	h.mu.RLock()
 	defer h.mu.RUnlock()
@@ -349,7 +355,7 @@ func debugDetails(m DecodedMessage) any {
 	if m.Statistics == nil {
 		return nil
 	}
-	return map[string]any{"sessionId": m.Statistics.SessionID, "islandId": m.Statistics.IslandID, "areaIndex": m.Statistics.AreaIndex, "sessionGuid": m.Statistics.SessionGUID, "areaName": m.Statistics.AreaName, "rawTimestamp": m.Statistics.RawTimestamp, "entries": m.Statistics.Entries}
+	return map[string]any{"sessionId": m.Statistics.SessionID, "islandId": m.Statistics.IslandID, "areaIndex": m.Statistics.AreaIndex, "sessionGuid": m.Statistics.SessionGUID, "areaName": m.Statistics.AreaName, "rawTimestamp": m.Statistics.RawTimestamp, "productionEntryCount": len(m.Statistics.Entries)}
 }
 func wireMessage(m DecodedMessage) any {
 	switch m.Type {
@@ -811,6 +817,7 @@ func runPipeReader(ctx context.Context, h *Hub) {
 		delay = time.Second
 		h.setPipeState(Connected, "pipe.connected", nil, nil)
 		if e = readPipe(ctx, h, conn); e != nil && ctx.Err() == nil {
+			h.clearSnapshots()
 			h.setPipeState(Disconnected, "pipe.disconnected", nil, nil)
 		}
 		_ = conn.Close()
